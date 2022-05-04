@@ -21,17 +21,48 @@ Last step,
     `FileDownloader().downloadFile(
         url: _YOUR DOWNLOAD URL_,
         name: **OPTIONAL**, _THE FILE NAME AFTER DOWNLOADING_,
-        onProgress: (name, progress) {
-          print('FILE $name HAS PROGRESS $progress');
+        onProgress: (String fileName, double progress) {
+          print('FILE fileName HAS PROGRESS $progress');
         },
-        onDownloadCompleted: (path) {
+        onDownloadCompleted: (String path) {
           print('FILE DOWNLOADED TO PATH: $path');
         },
-        onDownloadError: (error) {
+        onDownloadError: (String error) {
           print('DOWNLOAD ERROR: $error');
         });`
 
     **All callbacks can be null, you can simply call** `FileDownloader().downloadFile(YOUR_URL);`
 
-Please if you found any bug or issue do not hesitate opening an issue on github
-Also if you have any idea to enhance this plugin or add more features, feel free to **Pull request**
+
+##Examples:
+    `FileDownloader().downloadFile(
+        url: "https://tinypng.com/images/social/website.jpg",
+        name: "PANDA",
+        onDownloadCompleted: (path) {
+            final File file = File(path);
+            //This will be the path of the downloaded file
+        });`
+
+    `final File? file = await FileDownloader().downloadFile(
+        url: "https://tinypng.com/images/social/developer-api.jpg",
+        name: "ANOTHER PANDA.jpg");
+
+    print('FILE: ${file?.path}');`
+
+    You can also track the progress if you want to add a progress bar
+
+    `final File? file = await FileDownloader().downloadFile(
+        url: "https://tinypng.com/images/social/developer-api.jpg",
+        name: "ANOTHER PANDA.jpg",
+        onProgress: (String fileName, double progress) {
+            setState(() => _progress = progress);
+        });`
+
+    print('FILE: ${file?.path}');`
+
+##Contributing
+    All contributions are welcome!
+
+    If you like this project then please click on the 🌟 it'll be appreciated or if you wanna add more epic stuff you can submite your pull request and it'll be gladly accepted 🙆‍♂️
+
+or if you found any bug or issue do not hesitate opening an issue on github
