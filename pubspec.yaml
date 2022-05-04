@@ -1,7 +1,7 @@
 name: flutter_file_downloader
 description: A new Flutter project.
 version: 1.0.0
-homepage:
+homepage: https://github.com/abdallah-odeh/flutter_files_downloader.git
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
