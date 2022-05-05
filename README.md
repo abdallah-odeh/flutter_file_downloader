@@ -35,10 +35,9 @@ Last step,<br/>
         });
 ```
 
-    **All callbacks can be null, you can simply call** `FileDownloader().downloadFile(YOUR_URL);`
+**All callbacks can be null, you can simply call** `FileDownloader().downloadFile(YOUR_URL);`
 
-
-##Examples:
+## Examples:
 ```
     FileDownloader().downloadFile(
         url: "https://tinypng.com/images/social/website.jpg",
@@ -56,7 +55,7 @@ Last step,<br/>
     print('FILE: ${file?.path}');
 ```
 
-    You can also track the progress if you want to add a progress bar
+You can also track the progress if you want to add a progress bar
 ```
     final File? file = await FileDownloader().downloadFile(
         url: "https://tinypng.com/images/social/developer-api.jpg",
@@ -68,7 +67,7 @@ Last step,<br/>
     print('FILE: ${file?.path}');`
 ```
 
-##Contributing
+## Contributing
 All contributions are welcome!
 
 If you like this project then please click on the 🌟 it'll be appreciated or if you wanna add more epic stuff you can submite your pull request and it'll be gladly accepted 🙆‍♂️
