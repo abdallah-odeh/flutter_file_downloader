@@ -11,8 +11,8 @@ Note: This plugin is not built for iOS, it will not effect it at all.
 
 First, make sure that you've added the permissions
 ```
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 ```
 to your AndroidManifest.xml
 
@@ -22,56 +22,56 @@ Add the following line to your pubspec.yaml
 Next,  
     add the library import to your dart file,  
 ```
-    import 'package:flutter_file_downloader/flutter_file_downloader.dart';
+import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 ```
 
 Last step,  
     use the library easily in your code  
 ```
-    FileDownloader().downloadFile(
-        url: _YOUR DOWNLOAD URL_,
-        name: **OPTIONAL**, _THE FILE NAME AFTER DOWNLOADING_,
-        onProgress: (String fileName, double progress) {
-          print('FILE fileName HAS PROGRESS $progress');
-        },
-        onDownloadCompleted: (String path) {
-          print('FILE DOWNLOADED TO PATH: $path');
-        },
-        onDownloadError: (String error) {
-          print('DOWNLOAD ERROR: $error');
-        });
+FileDownloader().downloadFile(
+    url: _YOUR DOWNLOAD URL_,
+    name: **OPTIONAL**, _THE FILE NAME AFTER DOWNLOADING_,
+    onProgress: (String fileName, double progress) {
+      print('FILE fileName HAS PROGRESS $progress');
+    },
+    onDownloadCompleted: (String path) {
+      print('FILE DOWNLOADED TO PATH: $path');
+    },
+    onDownloadError: (String error) {
+      print('DOWNLOAD ERROR: $error');
+    });
 ```
 
 **All callbacks are nullables, you can simply call** `FileDownloader().downloadFile(YOUR_URL);`
 
 ## Examples:
 ```
-    FileDownloader().downloadFile(
-        url: "https://tinypng.com/images/social/website.jpg",
-        name: "PANDA",
-        onDownloadCompleted: (path) {
-            final File file = File(path);
-            //This will be the path of the downloaded file
-        });
+FileDownloader().downloadFile(
+    url: "https://tinypng.com/images/social/website.jpg",
+    name: "PANDA",
+    onDownloadCompleted: (path) {
+        final File file = File(path);
+        //This will be the path of the downloaded file
+    });
 ```
 ```
-    final File? file = await FileDownloader().downloadFile(
-        url: "https://tinypng.com/images/social/developer-api.jpg",
-        name: "ANOTHER PANDA.jpg");
+final File? file = await FileDownloader().downloadFile(
+    url: "https://tinypng.com/images/social/developer-api.jpg",
+    name: "ANOTHER PANDA.jpg");
 
-    print('FILE: ${file?.path}');
+print('FILE: ${file?.path}');
 ```
 
 You can also track the progress if you want to add a progress bar
 ```
-    final File? file = await FileDownloader().downloadFile(
-        url: "https://tinypng.com/images/social/developer-api.jpg",
-        name: "ANOTHER PANDA.jpg",
-        onProgress: (String fileName, double progress) {
-            setState(() => _progress = progress);
-        });
+final File? file = await FileDownloader().downloadFile(
+    url: "https://tinypng.com/images/social/developer-api.jpg",
+    name: "ANOTHER PANDA.jpg",
+    onProgress: (String fileName, double progress) {
+        setState(() => _progress = progress);
+    });
 
-    print('FILE: ${file?.path}');`
+print('FILE: ${file?.path}');`
 ```
 
 ## Contributing
