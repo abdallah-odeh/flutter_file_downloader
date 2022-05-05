@@ -1,3 +1,3 @@
-## 1.0.4
+## 1.0.5
 
-Fixed an issue where some pdf files might failed downloading
+Fixed issues
