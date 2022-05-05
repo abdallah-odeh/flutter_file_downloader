@@ -37,7 +37,6 @@ public class DownloadCompleterBroadcast extends BroadcastReceiver {
                         String path = Environment
                                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                                 .getAbsolutePath() + "/" + file;
-                        Log.e("SAVED TO PATH", path);
                         final DownloadCallbacks task = methodCallHandler.getTask(id);
                         if(task != null){
                             task.onDownloadCompleted(path);

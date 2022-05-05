@@ -62,8 +62,6 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-
-        System.out.println("calling native method: " + call.method);
         switch (call.method) {
             case "checkPermission":
                 onCheckPermission(result);
