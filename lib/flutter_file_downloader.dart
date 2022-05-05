@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
 
@@ -50,7 +51,7 @@ class FileDownloader {
     final OnDownloadError? onDownloadError,
   }) async {
     if (!Platform.isAndroid) {
-      print(
+      debugPrint(
           '[flutter_file_downloader] this plugin currently supports only android platform');
       return null;
     }
@@ -79,7 +80,7 @@ class FileDownloader {
         return File(result);
       }
     } catch (e) {
-      print('downloadFile error: $e');
+      debugPrint('downloadFile error: $e');
     }
   }
 

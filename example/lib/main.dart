@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 
 void main() {
@@ -62,7 +59,7 @@ class _MyAppState extends State<MyApp> {
                     onDownloadError: (error) {
                       setState(() => _status = 'Download error: $error');
                     });
-                print('file path: ${file?.path}');
+                debugPrint('file path: ${file?.path}');
               }, child: const Text('Download')),
             ],
           ),
