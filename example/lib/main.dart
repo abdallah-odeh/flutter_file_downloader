@@ -57,10 +57,10 @@ class _MyAppState extends State<MyApp> {
                       setState(() => _status = 'Progress: $progress%');
                     },
                     onDownloadCompleted: (path) {
-                      setState(() => _status = 'File downloaded to: $path%');
+                      setState(() => _status = 'File downloaded to: $path');
                     },
                     onDownloadError: (error) {
-                      setState(() => _status = 'Download error: $error%');
+                      setState(() => _status = 'Download error: $error');
                     });
                 print('file path: ${file?.path}');
               }, child: const Text('Download')),
