@@ -9,17 +9,17 @@ Note: This plugin is not built for iOS, it will not effect it at all.
 
 ## Getting Started
 
-Add the following line to your pubspec.yaml\n
+Add the following line to your pubspec.yaml<br/>
 ``` flutter_file_downloader: ^1.0.0```
 
-Next,\n
-    add the library import to your dart file,\n
+Next,<br/>
+    add the library import to your dart file,<br/>
 ```
     import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 ```
 
-Last step,\n
-    use the library easily in your code\n
+Last step,<br/>
+    use the library easily in your code<br/>
 ```
     FileDownloader().downloadFile(
         url: _YOUR DOWNLOAD URL_,
@@ -69,8 +69,8 @@ Last step,\n
 ```
 
 ##Contributing
-    All contributions are welcome!
+All contributions are welcome!
 
-    If you like this project then please click on the 🌟 it'll be appreciated or if you wanna add more epic stuff you can submite your pull request and it'll be gladly accepted 🙆‍♂️
+If you like this project then please click on the 🌟 it'll be appreciated or if you wanna add more epic stuff you can submite your pull request and it'll be gladly accepted 🙆‍♂️
 
 or if you found any bug or issue do not hesitate opening an issue on github
