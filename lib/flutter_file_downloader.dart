@@ -58,15 +58,19 @@ class FileDownloader {
       onDownloadCompleted: onDownloadCompleted,
       onDownloadError: onDownloadError,
     );
-    final result = await platform.invokeMethod('downloadFile', {
-      'url': url.trim(),
-      if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
-      if (onProgress != null) 'onprogress_named': 'valid function',
-      if (onDownloadCompleted != null) 'ondownloadcompleted': 'valid function',
-      if (onDownloadError != null) 'ondownloaderror': 'valid function',
-    });
-    if(result is String && result.isNotEmpty && result.toLowerCase().startsWith('/storage/')){
-      return File(result);
+    try {
+      final result = await platform.invokeMethod('downloadFile', {
+        'url': url.trim(),
+        if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
+        if (onProgress != null) 'onprogress_named': 'valid function',
+        if (onDownloadCompleted != null) 'ondownloadcompleted': 'valid function',
+        if (onDownloadError != null) 'ondownloaderror': 'valid function',
+      });
+      if(result is String && result.isNotEmpty && result.toLowerCase().startsWith('/storage/')){
+        return File(result);
+      }
+    } catch (e){
+      print('downloadFile error: $e');
     }
   }
 

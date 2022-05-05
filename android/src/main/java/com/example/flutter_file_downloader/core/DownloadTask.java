@@ -35,6 +35,12 @@ public class DownloadTask {
         final DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, getDownloadedFileName());
+
+        String path = Environment
+                .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                .getAbsolutePath() + "/" + getDownloadedFileName();
+
+        System.out.println("FILE PATH: "+path);
         final DownloadManager manager = (DownloadManager) activity.getSystemService(activity.DOWNLOAD_SERVICE);
         final long downloadedID = manager.enqueue(request);
         if (callbacks != null) {

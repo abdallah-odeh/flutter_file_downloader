@@ -10,7 +10,7 @@ Note: This plugin is not built for iOS, it will not effect it at all.
 ## Getting Started
 
 Add the following line to your pubspec.yaml  
-``` flutter_file_downloader: ^1.0.0```
+``` flutter_file_downloader: ^1.0.4```
 
 Next,  
     add the library import to your dart file,  
