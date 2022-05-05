@@ -23,91 +23,93 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 
-/** FlutterFileDownloaderPlugin */
+/**
+ * FlutterFileDownloaderPlugin
+ */
 public class FlutterFileDownloaderPlugin implements FlutterPlugin, ActivityAware {
 
-  private static final String TAG = "FlutterFileDownloader";
-  private final PermissionManager permissionManager;
+    private static final String TAG = "FlutterFileDownloader";
+    private final PermissionManager permissionManager;
 
-  @Nullable private MethodCallHandlerImpl methodCallHandler;
-  @Nullable private ActivityPluginBinding pluginBinding;
-  @Nullable private DownloadCompleterBroadcast onDownloadCompleted;
+    @Nullable private MethodCallHandlerImpl methodCallHandler;
+    @Nullable private ActivityPluginBinding pluginBinding;
+    @Nullable private DownloadCompleterBroadcast onDownloadCompleted;
 
-  public FlutterFileDownloaderPlugin(){
-    permissionManager = new PermissionManager();
-  }
-
-  @Override
-  public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    methodCallHandler = new MethodCallHandlerImpl(this.permissionManager);
-    methodCallHandler.startListening(
-            flutterPluginBinding.getApplicationContext(),
-            flutterPluginBinding.getBinaryMessenger());
-    onDownloadCompleted = new DownloadCompleterBroadcast(methodCallHandler);
-    bindForegroundService(flutterPluginBinding.getApplicationContext());
-  }
-
-  @Override
-  public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-    unbindForegroundService(binding.getApplicationContext());
-    dispose();
-  }
-
-  @Override
-  public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
-    this.pluginBinding = binding;
-    registerListeners();
-    if (methodCallHandler != null) {
-      methodCallHandler.setActivity(binding.getActivity());
+    public FlutterFileDownloaderPlugin() {
+        permissionManager = new PermissionManager();
     }
-  }
 
-  @Override
-  public void onDetachedFromActivityForConfigChanges() {
-    onDetachedFromActivity();
-  }
-
-  @Override
-  public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
-    onAttachedToActivity(binding);
-  }
-
-  @Override
-  public void onDetachedFromActivity() {
-    deregisterListeners();
-    if (methodCallHandler != null) {
-      methodCallHandler.setActivity(null);
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        methodCallHandler = new MethodCallHandlerImpl(this.permissionManager);
+        methodCallHandler.startListening(
+                flutterPluginBinding.getApplicationContext(),
+                flutterPluginBinding.getBinaryMessenger());
+        onDownloadCompleted = new DownloadCompleterBroadcast(methodCallHandler);
+        bindForegroundService(flutterPluginBinding.getApplicationContext());
     }
-    if (pluginBinding != null) {
-      pluginBinding = null;
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+        unbindForegroundService(binding.getApplicationContext());
+        dispose();
     }
-  }
 
-  private void registerListeners() {
-    if (pluginBinding != null) {
-      pluginBinding.addRequestPermissionsResultListener(this.permissionManager);
+    @Override
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+        this.pluginBinding = binding;
+        registerListeners();
+        if (methodCallHandler != null) {
+            methodCallHandler.setActivity(binding.getActivity());
+        }
     }
-  }
 
-  private void deregisterListeners() {
-    if (pluginBinding != null) {
-      pluginBinding.removeRequestPermissionsResultListener(this.permissionManager);
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+        onDetachedFromActivity();
     }
-  }
 
-  private void bindForegroundService(Context context) {
-    context.registerReceiver(onDownloadCompleted, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-  }
-
-  private void unbindForegroundService(Context context) {
-    context.unregisterReceiver(onDownloadCompleted);
-  }
-
-  private void dispose() {
-    if (methodCallHandler != null) {
-      methodCallHandler.stopListening();
-      methodCallHandler.setActivity(null);
-      methodCallHandler = null;
+    @Override
+    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+        onAttachedToActivity(binding);
     }
-  }
+
+    @Override
+    public void onDetachedFromActivity() {
+        deregisterListeners();
+        if (methodCallHandler != null) {
+            methodCallHandler.setActivity(null);
+        }
+        if (pluginBinding != null) {
+            pluginBinding = null;
+        }
+    }
+
+    private void registerListeners() {
+        if (pluginBinding != null) {
+            pluginBinding.addRequestPermissionsResultListener(this.permissionManager);
+        }
+    }
+
+    private void deregisterListeners() {
+        if (pluginBinding != null) {
+            pluginBinding.removeRequestPermissionsResultListener(this.permissionManager);
+        }
+    }
+
+    private void bindForegroundService(Context context) {
+        context.registerReceiver(onDownloadCompleted, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+    }
+
+    private void unbindForegroundService(Context context) {
+        context.unregisterReceiver(onDownloadCompleted);
+    }
+
+    private void dispose() {
+        if (methodCallHandler != null) {
+            methodCallHandler.stopListening();
+            methodCallHandler.setActivity(null);
+            methodCallHandler = null;
+        }
+    }
 }

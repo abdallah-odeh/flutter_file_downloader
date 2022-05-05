@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import 'download_callbacks.dart';
 
+///FlutterFileDownloader core file that handles native calls
 class FileDownloader {
   static FileDownloader? _instance;
 
@@ -48,6 +49,11 @@ class FileDownloader {
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
   }) async {
+    if (!Platform.isAndroid) {
+      print(
+          '[flutter_file_downloader] this plugin currently supports only android platform');
+      return null;
+    }
     if (!(Uri.tryParse(url)?.hasAbsolutePath ?? false)) {
       throw Exception(
           'URL is not valid, "$url" is not a valid url, please double check it then try again');
@@ -63,13 +69,16 @@ class FileDownloader {
         'url': url.trim(),
         if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
         if (onProgress != null) 'onprogress_named': 'valid function',
-        if (onDownloadCompleted != null) 'ondownloadcompleted': 'valid function',
+        if (onDownloadCompleted != null)
+          'ondownloadcompleted': 'valid function',
         if (onDownloadError != null) 'ondownloaderror': 'valid function',
       });
-      if(result is String && result.isNotEmpty && result.toLowerCase().startsWith('/storage/')){
+      if (result is String &&
+          result.isNotEmpty &&
+          result.toLowerCase().startsWith('/storage/')) {
         return File(result);
       }
-    } catch (e){
+    } catch (e) {
       print('downloadFile error: $e');
     }
   }

@@ -42,10 +42,8 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     private static final String TAG = "MethodCallHandlerImpl";
     private final PermissionManager permissionManager;
 
-    @Nullable
-    private Context context;
-    @Nullable
-    private Activity activity;
+    @Nullable private Context context;
+    @Nullable private Activity activity;
 
     private String lastURL, lastName;
     private MethodCall lastCall;
@@ -57,8 +55,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         this.permissionManager = permissionManager;
     }
 
-    @Nullable
-    private MethodChannel channel;
+    @Nullable private MethodChannel channel;
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
