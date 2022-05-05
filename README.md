@@ -1,8 +1,8 @@
 # flutter_file_downloader
 
 A simple flutter plugin that downloads all files types to downloads directory in all android devices.
-When android 10 came out, privacy was changed in big way
-and there are not enough info about it that are related to flutter,
+When android 10 came out, privacy restrictions were changed in big way
+and there are not enough flutter-related info about it,
 so I came up with a simple ANDROID plugin to downloads any file type to downloads directory
 Also it has callbacks and progress listeners with a very easy installation
 Note: This plugin is not built for iOS, it will not effect it at all.

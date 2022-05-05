@@ -1,3 +1,3 @@
-## 1.0.2
+## 1.0.3
 
-*Cleaned the code & removed unused permissions
+Fixed an issue where some pdf files might failed downloading
