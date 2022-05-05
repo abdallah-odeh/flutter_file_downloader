@@ -9,6 +9,11 @@ Note: This plugin is not built for iOS, it will not effect it at all.
 
 ## Getting Started
 
+First, make sure that you've added the permissions
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    to your AndroidManifest.xml
+
 Add the following line to your pubspec.yaml  
 ``` flutter_file_downloader: ^1.0.4```
 
