@@ -9,16 +9,19 @@ Note: This plugin is not built for iOS, it will not effect it at all.
 
 ## Getting Started
 
-Add the following line to your pubspec.yaml
-  `flutter_file_downloader: ^1.0.0`
+Add the following line to your pubspec.yaml\n
+``` flutter_file_downloader: ^1.0.0```
 
-Next,
-    add the library import to your dart file,
-    `import 'package:flutter_file_downloader/flutter_file_downloader.dart';`
+Next,\n
+    add the library import to your dart file,\n
+```
+    import 'package:flutter_file_downloader/flutter_file_downloader.dart';
+```
 
-Last step,
-    use the library easily in your code
-    `FileDownloader().downloadFile(
+Last step,\n
+    use the library easily in your code\n
+```
+    FileDownloader().downloadFile(
         url: _YOUR DOWNLOAD URL_,
         name: **OPTIONAL**, _THE FILE NAME AFTER DOWNLOADING_,
         onProgress: (String fileName, double progress) {
@@ -29,36 +32,41 @@ Last step,
         },
         onDownloadError: (String error) {
           print('DOWNLOAD ERROR: $error');
-        });`
+        });
+```
 
     **All callbacks can be null, you can simply call** `FileDownloader().downloadFile(YOUR_URL);`
 
 
 ##Examples:
-    `FileDownloader().downloadFile(
+```
+    FileDownloader().downloadFile(
         url: "https://tinypng.com/images/social/website.jpg",
         name: "PANDA",
         onDownloadCompleted: (path) {
             final File file = File(path);
             //This will be the path of the downloaded file
-        });`
-
-    `final File? file = await FileDownloader().downloadFile(
+        });
+```
+```
+    final File? file = await FileDownloader().downloadFile(
         url: "https://tinypng.com/images/social/developer-api.jpg",
         name: "ANOTHER PANDA.jpg");
 
-    print('FILE: ${file?.path}');`
+    print('FILE: ${file?.path}');
+```
 
     You can also track the progress if you want to add a progress bar
-
-    `final File? file = await FileDownloader().downloadFile(
+```
+    final File? file = await FileDownloader().downloadFile(
         url: "https://tinypng.com/images/social/developer-api.jpg",
         name: "ANOTHER PANDA.jpg",
         onProgress: (String fileName, double progress) {
             setState(() => _progress = progress);
-        });`
+        });
 
     print('FILE: ${file?.path}');`
+```
 
 ##Contributing
     All contributions are welcome!
