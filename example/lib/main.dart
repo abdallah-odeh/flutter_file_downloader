@@ -13,11 +13,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  double? _progress;
   String _status = '';
   final TextEditingController url = TextEditingController(
     text:
-      'http://www.africau.edu/images/default/sample.pdf',
-        // 'https://helpx.adobe.com/content/dam/help/en/photoshop/using/convert-color-image-black-white/jcr_content/main-pars/before_and_after/image-before/Landscape-Color.jpg',
+      // 'http://www.africau.edu/images/default/sample.pdf',
+        'https://helpx.adobe.com/content/dam/help/en/photoshop/using/convert-color-image-black-white/jcr_content/main-pars/before_and_after/image-before/Landscape-Color.jpg',
   );
   final TextEditingController name = TextEditingController();
 
@@ -37,6 +38,12 @@ class _MyAppState extends State<MyApp> {
                 Text(_status, textAlign: TextAlign.center),
                 const SizedBox(height: 16),
               ],
+              if (_progress != null) ...[
+                CircularProgressIndicator(
+                  value: _progress! / 100,
+                ),
+                const SizedBox(height: 16),
+              ],
               TextField(
                 controller: url,
                 decoration: const InputDecoration(label: Text('Url*')),
@@ -51,13 +58,22 @@ class _MyAppState extends State<MyApp> {
                     url: url.text.trim(),
                     name: name.text.trim(),
                     onProgress: (name, progress) {
-                      setState(() => _status = 'Progress: $progress%');
+                      setState(() {
+                        _progress = progress;
+                        _status = 'Progress: $progress%';
+                      });
                     },
                     onDownloadCompleted: (path) {
-                      setState(() => _status = 'File downloaded to: $path');
+                      setState(() {
+                        _progress = null;
+                        _status = 'File downloaded to: $path';
+                      });
                     },
                     onDownloadError: (error) {
-                      setState(() => _status = 'Download error: $error');
+                      setState(() {
+                        _progress = null;
+                        _status = 'Download error: $error';
+                      });
                     });
                 debugPrint('file path: ${file?.path}');
               }, child: const Text('Download')),

@@ -1,3 +1,3 @@
-## 1.0.7
+## 1.0.9
 
-Enhancements
+Fixing bugs

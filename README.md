@@ -16,7 +16,7 @@ First, make sure that you've added the permissions to your AndroidManifest.xml
 ```
 
 Add the following line to your pubspec.yaml  
-``` flutter_file_downloader: ^1.0.7```
+``` flutter_file_downloader: ^1.0.9```
 
 Next,  
     add the library import to your dart file,  
@@ -76,6 +76,6 @@ print('FILE: ${file?.path}');`
 ## Contributing
 All contributions are welcome!
 
-If you like this project then please click on the 🌟 it'll be appreciated or if you wanna add more epic stuff you can submite your pull request and it'll be gladly accepted 🙆‍♂️
+If you like this project then please click on the 🌟 it'll be appreciated or if you wanna add more epic stuff you can submit your pull request and it'll be gladly accepted 🙆‍♂️
 
 or if you found any bug or issue do not hesitate opening an issue on github

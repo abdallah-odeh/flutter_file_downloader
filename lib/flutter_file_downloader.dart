@@ -53,7 +53,7 @@ class FileDownloader {
     if (!Platform.isAndroid) {
       debugPrint(
           '[flutter_file_downloader] this plugin currently supports only android platform');
-      return null;
+      return Future.value(null);
     }
     if (!(Uri.tryParse(url)?.hasAbsolutePath ?? false)) {
       throw Exception(
