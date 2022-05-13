@@ -56,8 +56,8 @@ class FileDownloader {
       return Future.value(null);
     }
     if (!(Uri.tryParse(url)?.hasAbsolutePath ?? false)) {
-      throw Exception(
-          'URL is not valid, "$url" is not a valid url, please double check it then try again');
+      return Future.error(Exception(
+          'URL is not valid, "$url" is not a valid url, please double check it then try again'));
     }
     _pendingCallbacks['$url|${DateTime.now().millisecondsSinceEpoch}'] =
         DownloadCallbacks(
