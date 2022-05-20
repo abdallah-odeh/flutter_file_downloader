@@ -82,6 +82,7 @@ class FileDownloader {
     } catch (e) {
       debugPrint('downloadFile error: $e');
     }
+    return Future.value(null);
   }
 
   Future<void> _methodCallHandler(MethodCall call) async {
