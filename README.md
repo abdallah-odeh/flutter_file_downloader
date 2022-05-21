@@ -66,7 +66,7 @@ You can also track the progress if you want to add a progress bar
 final File? file = await FileDownloader.downloadFile(
     url: "https://tinypng.com/images/social/developer-api.jpg",
     name: "ANOTHER PANDA.jpg",
-    onProgress: (String fileName, double progress) {
+    onProgress: (String? fileName, double progress) {
         setState(() => _progress = progress);
     });
 
