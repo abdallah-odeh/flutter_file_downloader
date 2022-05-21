@@ -1,3 +1,3 @@
-## 1.0.11
+## 1.0.12
 
-Enhancements
+Fixed bug where the callback **onDownloadCompleted** might not be called sometimes

@@ -16,7 +16,7 @@ First, make sure that you've added the permissions to your AndroidManifest.xml
 ```
 
 Add the following line to your pubspec.yaml  
-``` flutter_file_downloader: ^1.0.11```
+``` flutter_file_downloader: ^1.0.12```
 
 Next,  
     add the library import to your dart file,  

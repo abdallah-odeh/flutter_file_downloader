@@ -143,10 +143,6 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         try {
             if (!permissionManager.hasPermission(context)) {
                 onRequestPermission(result, false);
-//        result.error(
-//                ErrorCodes.permissionDenied.toString(),
-//                ErrorCodes.permissionDenied.toDescription(),
-//                null);
                 return;
             }
         } catch (PermissionUndefinedException e) {
@@ -157,7 +153,6 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
             return;
         }
 
-        @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) call.arguments;
         lastURL = call.argument("url");
         lastName = call.argument("name");

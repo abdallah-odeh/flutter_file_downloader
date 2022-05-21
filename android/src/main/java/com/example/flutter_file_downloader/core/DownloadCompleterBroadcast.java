@@ -22,41 +22,45 @@ public class DownloadCompleterBroadcast extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         if (action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
-            DownloadManager.Query query = new DownloadManager.Query();
-            final long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-            query.setFilterById(id);
-            DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-            Cursor cursor = manager.query(query);
-            if (cursor.moveToFirst()) {
-                if (cursor.getCount() > 0) {
-                    int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
-                    if (status == DownloadManager.STATUS_SUCCESSFUL) {
+            try {
+                DownloadManager.Query query = new DownloadManager.Query();
+                final long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                query.setFilterById(id);
+                DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+                Cursor cursor = manager.query(query);
+                if (cursor.moveToFirst()) {
+                    if (cursor.getCount() > 0) {
+                        int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                        if (status == DownloadManager.STATUS_SUCCESSFUL) {
 
-                        String file = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE));
+                            String file = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE));
 
-                        String path = Environment
-                                .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                                .getAbsolutePath() + "/" + file;
-                        final DownloadCallbacks task = methodCallHandler.getTask(id);
-                        if(task != null){
-                            task.onDownloadCompleted(path);
-                        }
-                        methodCallHandler.lastResult.success(path);
-                    } else {
-                        int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
-                        if (columnIndex > -1) {
-                            int message = cursor.getInt(columnIndex);
-
+                            String path = Environment
+                                    .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                                    .getAbsolutePath() + "/" + file;
                             final DownloadCallbacks task = methodCallHandler.getTask(id);
-                            if(task != null)
-                                task.onDownloadError(message + "");
+                            if(task != null){
+                                task.onDownloadCompleted(path);
+                            }
+                            methodCallHandler.lastResult.success(path);
+                        } else {
+                            int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
+                            if (columnIndex > -1) {
+                                int message = cursor.getInt(columnIndex);
 
-                            methodCallHandler.lastResult.error("Download file error", message + "", null);
+                                final DownloadCallbacks task = methodCallHandler.getTask(id);
+                                if(task != null)
+                                    task.onDownloadError(message + "");
+
+                                methodCallHandler.lastResult.error("Download file error", message + "", null);
+                            }
                         }
                     }
                 }
+                methodCallHandler.removeTask(id);
+            } catch (Exception e){
+                e.printStackTrace();
             }
-            methodCallHandler.removeTask(id);
         }
     }
 }
