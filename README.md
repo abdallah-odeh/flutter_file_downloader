@@ -16,7 +16,7 @@ First, make sure that you've added the permissions to your AndroidManifest.xml
 ```
 
 Add the following line to your pubspec.yaml  
-``` flutter_file_downloader: ^1.0.12```
+``` flutter_file_downloader: ^1.0.13```
 
 Next,  
     add the library import to your dart file,  
@@ -27,7 +27,7 @@ import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 Last step,  
     use the library easily in your code  
 ```
-FileDownloader().downloadFile(
+FileDownloader.downloadFile(
     url: _YOUR DOWNLOAD URL_,
     name: **OPTIONAL**, _THE FILE NAME AFTER DOWNLOADING_,
     onProgress: (String fileName, double progress) {
@@ -41,11 +41,11 @@ FileDownloader().downloadFile(
     });
 ```
 
-**All callbacks are nullables, you can simply call** `FileDownloader().downloadFile(YOUR_URL);`
+**All callbacks are nullables, you can simply call** `FileDownloader.downloadFile(YOUR_URL);`
 
 ## Examples:
 ```
-FileDownloader().downloadFile(
+FileDownloader.downloadFile(
     url: "https://tinypng.com/images/social/website.jpg",
     name: "PANDA",
     onDownloadCompleted: (path) {
@@ -54,7 +54,7 @@ FileDownloader().downloadFile(
     });
 ```
 ```
-final File? file = await FileDownloader().downloadFile(
+final File? file = await FileDownloader.downloadFile(
     url: "https://tinypng.com/images/social/developer-api.jpg",
     name: "ANOTHER PANDA.jpg");
 
@@ -63,7 +63,7 @@ print('FILE: ${file?.path}');
 
 You can also track the progress if you want to add a progress bar
 ```
-final File? file = await FileDownloader().downloadFile(
+final File? file = await FileDownloader.downloadFile(
     url: "https://tinypng.com/images/social/developer-api.jpg",
     name: "ANOTHER PANDA.jpg",
     onProgress: (String fileName, double progress) {
