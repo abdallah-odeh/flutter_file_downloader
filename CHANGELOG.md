@@ -1,3 +1,4 @@
-## 1.0.14
+## 1.1.0
 
-Fixed bug where the callback **onDownloadCompleted** might not be called sometimes
+Added a feature where you can set the consecutive downloads limit to help reserving device resources
+Added a new method to download multiple files at once with ability to control parallelism

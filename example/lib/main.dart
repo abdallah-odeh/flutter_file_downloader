@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_file_downloader/flutter_file_downloader.dart';
+import 'package:flutter_file_downloader_example/multiple_downloads.dart';
+import 'package:flutter_file_downloader_example/settings.dart';
+
+import 'single_download.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,73 +15,35 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  double? _progress;
-  String _status = '';
-  final TextEditingController url = TextEditingController(
-    text:
-      // 'http://www.africau.edu/images/default/sample.pdf',
-        'https://helpx.adobe.com/content/dam/help/en/photoshop/using/convert-color-image-black-white/jcr_content/main-pars/before_and_after/image-before/Landscape-Color.jpg',
-  );
-  final TextEditingController name = TextEditingController();
+class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
+  late final TabController tabController =
+      TabController(length: 3, vsync: this, initialIndex: 1);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      locale: Locale('ar'),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Flutter file downloader example'),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_status.isNotEmpty) ...[
-                Text(_status, textAlign: TextAlign.center),
-                const SizedBox(height: 16),
-              ],
-              if (_progress != null) ...[
-                CircularProgressIndicator(
-                  value: _progress! / 100,
-                ),
-                const SizedBox(height: 16),
-              ],
-              TextField(
-                controller: url,
-                decoration: const InputDecoration(label: Text('Url*')),
-              ),
-              TextField(
-                controller: name,
-                decoration: const InputDecoration(label: Text('File name')),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(onPressed: () async {
-                final file = await FileDownloader.downloadFile(
-                    url: url.text.trim(),
-                    name: name.text.trim(),
-                    onProgress: (name, progress) {
-                      setState(() {
-                        _progress = progress;
-                        _status = 'Progress: $progress%';
-                      });
-                    },
-                    onDownloadCompleted: (path) {
-                      setState(() {
-                        _progress = null;
-                        _status = 'File downloaded to: $path';
-                      });
-                    },
-                    onDownloadError: (error) {
-                      setState(() {
-                        _progress = null;
-                        _status = 'Download error: $error';
-                      });
-                    });
-                debugPrint('file path: ${file?.path}');
-              }, child: const Text('Download')),
-            ],
-          ),
+        body: TabBarView(
+          controller: tabController,
+          children: const [
+            SettingsScreen(),
+            SingleDownloadScreen(),
+            MultipleDownloads(),
+          ],
+        ),
+        bottomNavigationBar: TabBar(
+          tabs: const [
+            Tab(icon: Icon(Icons.settings), text: 'Settings'),
+            Tab(icon: Icon(Icons.download_rounded), text: 'Single download'),
+            Tab(icon: Icon(Icons.cloud_download), text: 'Bulk download'),
+          ],
+          controller: tabController,
+          labelColor: Colors.blue,
+          unselectedLabelColor: Colors.grey,
         ),
       ),
     );

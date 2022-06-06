@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.example.flutter_file_downloader.MethodCallHandlerImpl;
+import com.example.flutter_file_downloader.StoreHelper;
 
 public class DownloadCompleterBroadcast extends BroadcastReceiver {
 
@@ -42,7 +43,11 @@ public class DownloadCompleterBroadcast extends BroadcastReceiver {
                             if(task != null){
                                 task.onDownloadCompleted(path);
                             }
-                            methodCallHandler.lastResult.success(path);
+                            final StoreHelper helper = methodCallHandler.findHelper(id);
+                            if (helper != null)
+                                helper.result.success(path);
+                            else
+                                System.out.println("COULD NOT FIND HELPER WITH KEY: "+id);
                         } else {
                             int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
                             if (columnIndex > -1) {
@@ -52,7 +57,9 @@ public class DownloadCompleterBroadcast extends BroadcastReceiver {
                                 if(task != null)
                                     task.onDownloadError(message + "");
 
-                                methodCallHandler.lastResult.error("Download file error", message + "", null);
+                                final StoreHelper helper = methodCallHandler.findHelper(id);
+                                if(helper != null)
+                                helper.result.error("Download file error", message + "", null);
                             }
                         }
                     }

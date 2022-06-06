@@ -28,6 +28,7 @@ import com.example.flutter_file_downloader.permission.PermissionResultCallback;
 import com.example.flutter_file_downloader.core.DownloadCallbacks;
 import com.example.flutter_file_downloader.core.DownloadTaskBuilder;
 import com.example.flutter_file_downloader.core.DownloadTask;
+import com.example.flutter_file_downloader.StoreHelper;
 
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
@@ -48,32 +49,42 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     private Activity activity;
 
     private String lastURL, lastName;
-    private MethodCall lastCall;
-    public MethodChannel.Result lastResult;
+//    private MethodCall lastCall;
+//    public MethodChannel.Result lastResult;
     private final Map<Long, DownloadCallbacks> tasks = new HashMap<>();
+    private final Map<String, StoreHelper> stored = new HashMap<>();
 
     MethodCallHandlerImpl(
             PermissionManager permissionManager) {
+        System.out.println("MethodCallHandlerImpl INSTANCE CREATED!!!");
         this.permissionManager = permissionManager;
     }
 
     @Nullable
     private MethodChannel channel;
 
+    public StoreHelper findHelper(final long id){
+        final String toFind = String.valueOf(id);
+        for(final String key: stored.keySet()){
+            if((toFind+"").equals(stored.get(key).id+"")) return  stored.get(key);
+        }
+        return null;
+    }
+
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-        lastCall = call;
-        lastResult = result;
+        final StoreHelper helper = new StoreHelper(call, result);
+        stored.put(call.argument("key"), helper);
         switch (call.method) {
             case "checkPermission":
-                onCheckPermission(result);
+                onCheckPermission(helper.result);
                 break;
             case "requestPermission":
-                onRequestPermission(result, true);
+                onRequestPermission(helper, true);
                 break;
             case "onStartDownloadingFile":
             case "downloadFile":
-                onStartDownloadingFile(call, result);
+                onStartDownloadingFile(helper);
                 break;
             default:
                 result.notImplemented();
@@ -116,49 +127,52 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         }
     }
 
-    private void onRequestPermission(MethodChannel.Result result, final boolean sendResult) {
+    private void onRequestPermission(StoreHelper helper, final boolean sendResult) {
         try {
             permissionManager.requestPermission(
                     activity,
                     new PermissionResultCallback() {
                         @Override
                         public void onResult(StoragePermission permission) {
-                            if (sendResult)
-                                result.success(permission.toInt());
+                            if (sendResult) {
+                                helper.result.success(permission.toInt());
+                                stored.remove(helper.call.argument("key"));
+                            }
                             else {
                                 if (permission != StoragePermission.always) {
                                     ErrorCodes errorCode = ErrorCodes.permissionDenied;
-                                    result.error(errorCode.toString(), errorCode.toDescription(), null);
+                                    helper.result.error(errorCode.toString(), errorCode.toDescription(), null);
+                                    stored.remove(helper.call.argument("key"));
                                 } else
-                                    onMethodCall(lastCall, lastResult);
+                                    onMethodCall(helper.call, helper.result);
                             }
                         }
                     },
                     (ErrorCodes errorCode) ->
-                            result.error(errorCode.toString(), errorCode.toDescription(), null));
+                            helper.result.error(errorCode.toString(), errorCode.toDescription(), null));
         } catch (PermissionUndefinedException e) {
             ErrorCodes errorCode = ErrorCodes.permissionDefinitionsNotFound;
-            result.error(errorCode.toString(), errorCode.toDescription(), null);
+            helper.result.error(errorCode.toString(), errorCode.toDescription(), null);
         }
     }
 
-    private void onStartDownloadingFile(MethodCall call, MethodChannel.Result result) {
+    private void onStartDownloadingFile(StoreHelper helper) {
         try {
             if (!permissionManager.hasPermission(context)) {
-                onRequestPermission(result, false);
+                onRequestPermission(helper, false);
                 return;
             }
         } catch (PermissionUndefinedException e) {
-            result.error(
+            helper.result.error(
                     ErrorCodes.permissionDefinitionsNotFound.toString(),
                     ErrorCodes.permissionDefinitionsNotFound.toDescription(),
                     null);
             return;
         }
 
-        Map<String, Object> map = (Map<String, Object>) call.arguments;
-        lastURL = call.argument("url");
-        lastName = call.argument("name");
+        Map<String, Object> map = (Map<String, Object>) helper.call.arguments;
+        lastURL = helper.call.argument("url");
+        lastName = helper.call.argument("name");
 
         new DownloadTaskBuilder(activity)
                 .setUrl(lastURL)
@@ -169,12 +183,14 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                         super.onIDReceived(id);
                         tasks.put(id, this);
 
-                        final String onProgress = call.argument("onidreceived");
+                        final String onProgress = helper.call.argument("onidreceived");
 
                         Map<String, Object> args = new HashMap();
 
                         args.put("id", id);
-                        args.put("url", call.argument("url"));
+                        args.put("url", helper.call.argument("url"));
+                        args.put("key", helper.call.argument("key"));
+                        stored.get(helper.call.argument("key")).id = String.valueOf(id);
                         channel.invokeMethod("onIDReceived", args);
                     }
 
@@ -182,13 +198,14 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     public void onProgress(double progress) {
                         super.onProgress(progress);
 
-                        final String onProgress = call.argument("onprogress");
+                        final String onProgress = helper.call.argument("onprogress");
 
                         if (TextUtils.isEmpty(onProgress)) return;
                         Map<String, Object> args = new HashMap();
 
                         args.put("id", id);
                         args.put("progress", progress);
+                        args.put("key", helper.call.argument("key"));
                         channel.invokeMethod("onProgress", args);
                     }
 
@@ -196,7 +213,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     public void onProgress(String name, double progress) {
                         super.onProgress(name, progress);
 
-                        final String onProgressWithName = call.argument("onprogress_named");
+                        final String onProgressWithName = helper.call.argument("onprogress_named");
 
                         if (TextUtils.isEmpty(onProgressWithName)) return;
                         Map<String, Object> args = new HashMap();
@@ -204,6 +221,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                         args.put("id", id);
                         args.put("name", name);
                         args.put("progress", progress);
+                        args.put("key", helper.call.argument("key"));
                         channel.invokeMethod("onProgress", args);
                     }
 
@@ -211,26 +229,28 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     public void onDownloadCompleted(String path) {
                         super.onDownloadCompleted(path);
 
-                        final String onDownloadCompleted = call.argument("ondownloadcompleted");
+                        final String onDownloadCompleted = helper.call.argument("ondownloadcompleted");
 
                         if (TextUtils.isEmpty(onDownloadCompleted)) return;
                         Map<String, Object> args = new HashMap();
 
                         args.put("id", id);
                         args.put("path", path);
+                        args.put("key", helper.call.argument("key"));
                         channel.invokeMethod("onDownloadCompleted", args);
                     }
 
                     @Override
                     public void onDownloadError(String errorMessage) {
                         super.onDownloadError(errorMessage);
-                        final String onDownloadError = call.argument("ondownloaderror");
+                        final String onDownloadError = helper.call.argument("ondownloaderror");
 
                         if (TextUtils.isEmpty(onDownloadError)) return;
                         Map<String, Object> args = new HashMap();
 
                         args.put("id", id);
                         args.put("error", errorMessage);
+                        args.put("key", helper.call.argument("key"));
                         channel.invokeMethod("onDownloadError", args);
                     }
                 })
