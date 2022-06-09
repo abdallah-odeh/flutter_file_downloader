@@ -27,6 +27,7 @@ import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 Last step,  
     use the library easily in your code  
 ```
+//You can download a single file
 FileDownloader.downloadFile(
     url: _YOUR DOWNLOAD URL_,
     name: **OPTIONAL**, _THE FILE NAME AFTER DOWNLOADING_,
@@ -39,6 +40,33 @@ FileDownloader.downloadFile(
     onDownloadError: (String error) {
       print('DOWNLOAD ERROR: $error');
     });
+    
+//Or download multiple of files 
+final List<File?> result = await FileDownloader.downloadFiles(
+    urls: [
+        'https://cdn.mos.cms.futurecdn.net/vChK6pTy3vN3KbYZ7UU7k3-320-80.jpg',
+        'https://fansided.com/files/2015/10/cat.jpg',
+    ],
+    isParallel: true,   //if this is set to true, your download list will request to be downloaded all at once
+                        //if your downloading queue fits them all, they are all will start downloading
+                        //if it's set to false, it will download every file individually
+                        //default is true
+    onAllDownloaded: () {
+      //This callback will be fired when all files are done
+    });
+    //This method will return a list of File? in the same order as the urls,
+    //so if the url[2] failed to download, 
+    //them result[2] will be null
+    
+//Also, you can enable or disable the log, this will help you track your download batches
+FileDownloader.setLogEnabled(true);
+//default is false
+
+//You can set the number of consecutive downloads to help you preserving device's resources 
+FileDownloader.setMaximumParallelDownloads(10);
+//This method will allow the plugin to download 10 files at a time
+//if your requested to download more than that, it will wait until a download is done to start another
+//default is 25, maximum is 25, minimum is 1
 ```
 
 **All callbacks are nullables, you can simply call** `FileDownloader.downloadFile(YOUR_URL);`
