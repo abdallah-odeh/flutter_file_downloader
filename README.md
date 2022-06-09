@@ -89,7 +89,7 @@ final List<File?> result = await FileDownloader.downloadFiles(
     ],
     isParallel: false);
     
-print('FILES: ${result?.map((e) => e?.path).join(',\n')}');
+print('FILES: ${result.map((e) => e?.path).join(',\n')}');
 ```
 ```
 final File? file = await FileDownloader.downloadFile(
