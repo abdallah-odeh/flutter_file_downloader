@@ -60,13 +60,13 @@ final List<File?> result = await FileDownloader.downloadFiles(
     
 //Also, you can enable or disable the log, this will help you track your download batches
 FileDownloader.setLogEnabled(true);
-//default is false
+    //default is false
 
 //You can set the number of consecutive downloads to help you preserving device's resources 
 FileDownloader.setMaximumParallelDownloads(10);
-//This method will allow the plugin to download 10 files at a time
-//if your requested to download more than that, it will wait until a download is done to start another
-//default is 25, maximum is 25, minimum is 1
+    //This method will allow the plugin to download 10 files at a time
+    //if your requested to download more than that, it will wait until a download is done to start another
+    //default is 25, maximum is 25, minimum is 1
 ```
 
 **All callbacks are nullables, you can simply call** `FileDownloader.downloadFile(YOUR_URL);`
@@ -80,6 +80,16 @@ FileDownloader.downloadFile(
         final File file = File(path);
         //This will be the path of the downloaded file
     });
+```
+```
+final List<File?> result = await FileDownloader.downloadFiles(
+    urls: [
+        'https://cdn.mos.cms.futurecdn.net/vChK6pTy3vN3KbYZ7UU7k3-320-80.jpg',
+        'https://fansided.com/files/2015/10/cat.jpg',
+    ],
+    isParallel: false);
+    
+print('FILES: ${result?.map((e) => e?.path).join(',\n')}');
 ```
 ```
 final File? file = await FileDownloader.downloadFile(
