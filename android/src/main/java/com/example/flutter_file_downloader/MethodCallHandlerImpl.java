@@ -174,9 +174,11 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         lastURL = helper.call.argument("url");
         lastName = helper.call.argument("name");
 
+
         new DownloadTaskBuilder(activity)
                 .setUrl(lastURL)
                 .setName(lastName)
+                .setDeleteOldVersion(helper.call.argument("replace_old_version").toString().equals("true"))
                 .setCallbacks(new DownloadCallbacks() {
                     @Override
                     public void onIDReceived(long id) {

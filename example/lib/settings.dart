@@ -8,9 +8,11 @@ class SettingsScreen extends StatefulWidget {
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
+bool replaceFilesOldVersions = false;
+
 class _SettingsScreenState extends State<SettingsScreen> {
 
-  bool enabled = FileDownloader().isLogEnabled;
+  bool logEnabled = FileDownloader().isLogEnabled;
   int parallelTasks = FileDownloader().maximumParallelDownloads;
 
   @override
@@ -23,12 +25,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Row(
             children: [
               Expanded(
-                child: Text(enabled ? 'Enabled' : 'Disabled', style: Theme.of(context).textTheme.subtitle1),
+                child: Text(logEnabled ? 'Enabled' : 'Disabled', style: Theme.of(context).textTheme.subtitle1),
               ),
               const SizedBox(width: 16),
-              Switch(value: enabled, onChanged: (value){
-                setState(() => enabled = value);
-                FileDownloader.setLogEnabled(enabled);
+              Switch(value: logEnabled, onChanged: (value){
+                setState(() => logEnabled = value);
+                FileDownloader.setLogEnabled(logEnabled);
+              })
+            ],
+          ),
+
+
+          const SizedBox(height: 16),
+          const Divider(
+              color: Colors.grey,
+              height: 1
+          ),
+          const SizedBox(height: 32),
+
+          Text('Replace any file if already exists?', style: Theme.of(context).textTheme.headline6,),
+          Row(
+            children: [
+              Expanded(
+                child: Text(replaceFilesOldVersions ? 'Enabled' : 'Disabled', style: Theme.of(context).textTheme.subtitle1),
+              ),
+              const SizedBox(width: 16),
+              Switch(value: replaceFilesOldVersions, onChanged: (value){
+                setState(() => replaceFilesOldVersions = value);
               })
             ],
           ),

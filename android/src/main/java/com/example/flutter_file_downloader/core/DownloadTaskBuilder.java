@@ -3,35 +3,46 @@ package com.example.flutter_file_downloader.core;
 import android.app.Activity;
 
 public class DownloadTaskBuilder {
-    DownloadTaskBuilder instance;
+//    DownloadTaskBuilder instance;
     String url, name;
     DownloadCallbacks callbacks;
+    boolean deleteOldVersion = false;
     final Activity activity;
     private DownloadTask task;
 
     public DownloadTaskBuilder(final Activity activity) {
         this.activity = activity;
-        instance = this;
+//        instance = this;
     }
 
     public DownloadTaskBuilder setUrl(final String url) {
-        instance.url = url;
-        return instance;
+        this.url = url;
+        return this;
     }
 
     public DownloadTaskBuilder setName(final String name) {
-        instance.name = name;
-        return instance;
+        this.name = name;
+        return this;
     }
 
     public DownloadTaskBuilder setCallbacks(final DownloadCallbacks callbacks) {
-        instance.callbacks = callbacks;
-        return instance;
+        this.callbacks = callbacks;
+        return this;
+    }
+
+    public DownloadTaskBuilder setDeleteOldVersion(final boolean delete) {
+        deleteOldVersion = delete;
+        return this;
     }
 
     public DownloadTask build() {
         if (task == null)
-            task = new DownloadTask(instance.activity, instance.url, instance.name, callbacks);
+            task = new DownloadTask(
+                    activity,
+                    url,
+                    name,
+                    deleteOldVersion,
+                    callbacks);
         try {
             return getDownloadTask();
         } catch (Exception e) {

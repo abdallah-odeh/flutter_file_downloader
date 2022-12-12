@@ -4,29 +4,36 @@ import android.app.Activity;
 import android.app.DownloadManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
-import android.text.TextUtils;
-import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public class DownloadTask {
     final Activity activity;
     final String url, name;
+    final boolean deleteOldVersion;
     final DownloadCallbacks callbacks;
     private boolean isDownloading = false;
 
-    public DownloadTask(Activity activity, String url, String name, DownloadCallbacks callbacks) {
+    public DownloadTask(Activity activity, String url, String name, boolean deleteOldVersion, DownloadCallbacks callbacks) {
         this.callbacks = callbacks;
         this.activity = activity;
         this.url = url;
         this.name = name;
+        this.deleteOldVersion = deleteOldVersion;
     }
 
     public DownloadTask(Activity activity, String url, String name) {
         this.activity = activity;
         this.url = url;
         this.name = name;
+        deleteOldVersion = false;
         callbacks = null;
     }
 
@@ -40,17 +47,46 @@ public class DownloadTask {
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 .getAbsolutePath() + "/" + getDownloadedFileName();
 
+        if (deleteOldVersion) deleteFileOldVersion(path);
+
         final DownloadManager manager = (DownloadManager) activity.getSystemService(activity.DOWNLOAD_SERVICE);
         final long downloadedID = manager.enqueue(request);
+
+        DownloadManager.Query q = new DownloadManager.Query();
+        q.setFilterById(downloadedID);
+
+        Cursor cursor = manager.query(q);
+        cursor.moveToFirst();
+        System.out.println("STATUS: " + cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) + "!!!");
+        System.out.println("REASON: " + cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_REASON)) + "!!!");
+        System.out.println("SHOULD OVERRIDE?: " + (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.ERROR_FILE_ALREADY_EXISTS) + "!!!");
+
         if (callbacks != null) {
             callbacks.onIDReceived(downloadedID);
             trackDownload(manager, downloadedID);
         }
     }
 
-    private void trackDownload(final DownloadManager manager, final long downloadID) {
+    private void deleteFileOldVersion(final String path) {
+        System.out.println("FILE DELETION ATTEMPT "+path);
+        final File old = new File(path);
+        if (!old.exists()) return;
+        boolean deleted = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                deleted = Files.deleteIfExists(old.toPath());
+                System.out.println("FILE DELETE SDK_INT: " + deleted + "!!!");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        deleted = old.delete();
+        System.out.println("FILE DELETE SDK_INT: " + deleted + "!!!");
+    }
 
+    private void trackDownload(final DownloadManager manager, final long downloadID) {
         Handler uiThreadHandler = new Handler(Looper.getMainLooper());
+
         new Thread(new Runnable() {
             @Override
             public void run() {

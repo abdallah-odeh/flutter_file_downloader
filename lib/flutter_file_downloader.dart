@@ -57,10 +57,13 @@ class FileDownloader {
   ///To print logs for downloading status & callbacks
   static void setLogEnabled(final bool enabled) => _enableLog = enabled;
 
-  ///[url]: the file url you want to download
-  ///[name]: the file name after download, this will be file name inside your dowloads directory
+  ///[url] the file url you want to download
+  ///[name] the file name after download, this will be file name inside your dowloads directory
   ///        if this was null, then the last segment of the url will be used as the name
   ///        the name can be written with the extension, if not, the extension will be extracted from the url
+  ///[replaceFileIfExists] deleted the file if already exists in the download directory
+  ///                     Note, the file must be in the same name & extension
+  ///                     default is false
   ///[onProgress] when the download progress change, you can update your UI or do anything you want
   ///             Note, some devices or urls jumps from 0 to 100 in one step
   ///[onDownloadCompleted] When the download is complete, this callback will be fired holding the file path
@@ -68,6 +71,7 @@ class FileDownloader {
   static Future<File?> downloadFile({
     required final String url,
     final String? name,
+    final bool replaceFileIfExists = false,
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
@@ -76,6 +80,7 @@ class FileDownloader {
         ._downloadFile(
           url: url,
           name: name,
+          replaceFileIfExists: replaceFileIfExists,
           onProgress: onProgress,
           onDownloadCompleted: onDownloadCompleted,
           onDownloadError: onDownloadError,
@@ -83,14 +88,17 @@ class FileDownloader {
         .catchError((error) => throw error);
   }
 
-  ///[urls]: a list of urls to files to be downloaded
-  ///[onAllDownloaded]: this callback will be triggered once all files downloaded are done
+  ///[urls] a list of urls to files to be downloaded
+  ///[isParallel] this flag determines if the download has to to processed at once
+  ///[replaceAnyFileIfExists] this flag deletes any old version of the file if exists
+  ///[onAllDownloaded] this callback will be triggered once all files downloaded are done
   ///                   note that some of the files might fail downloading
   ///                   and the files will be in the same order of the urls
   ///                   a filed to download file will be null at it's index
   static Future<List<File?>> downloadFiles({
     required final List<String> urls,
     final bool isParallel = true,
+    final bool replaceAnyFileIfExists = false,
     final VoidCallback? onAllDownloaded,
   }) async {
     if (isParallel) {
@@ -101,6 +109,7 @@ class FileDownloader {
         result[i] = null;
         downloadFile(
             url: urls[i],
+            replaceFileIfExists: replaceAnyFileIfExists,
             onDownloadCompleted: (path) {
               result[i] = File(path);
               tasks[i] = true;
@@ -120,7 +129,10 @@ class FileDownloader {
     } else {
       final List<File?> result = [
         for (final url in urls)
-          await downloadFile(url: url).catchError((error) => null),
+          await downloadFile(
+            url: url,
+            replaceFileIfExists: replaceAnyFileIfExists,
+          ).catchError((error) => null),
       ];
       onAllDownloaded?.call();
       return result;
@@ -130,6 +142,7 @@ class FileDownloader {
   Future<File?> _downloadFile({
     required final String url,
     final String? name,
+    required final bool replaceFileIfExists,
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
@@ -145,6 +158,7 @@ class FileDownloader {
     final task = _DownloadTask(
       url: url.trim(),
       name: name?.trim(),
+      replaceOldVersion: replaceFileIfExists,
       callbacks: DownloadCallbacks(
         onProgress: onProgress,
         onDownloadCompleted: onDownloadCompleted,
@@ -159,6 +173,7 @@ class FileDownloader {
         'url': url.trim(),
         'key': task.key.toString(),
         if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
+        'replace_old_version': task.replaceOldVersion,
         if (onProgress != null) 'onprogress_named': 'valid function',
         'ondownloadcompleted': 'valid function',
         if (onDownloadError != null) 'ondownloaderror': 'valid function',
@@ -253,12 +268,17 @@ class _DownloadTask {
   late final int key;
   final String url;
   final String? name;
+  final bool replaceOldVersion;
   final DownloadCallbacks callbacks;
 
   final Completer _completer;
 
-  _DownloadTask({required this.url, required this.callbacks, this.name})
-      : //key = DateTime.now().millisecondsSinceEpoch.toString(),
+  _DownloadTask({
+    required this.url,
+    required this.callbacks,
+    this.name,
+    this.replaceOldVersion = false,
+  }) : //key = DateTime.now().millisecondsSinceEpoch.toString(),
         _completer = Completer();
 
   bool get isDownloaded => _completer.isCompleted;
