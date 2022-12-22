@@ -157,18 +157,19 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     }
 
     private void onStartDownloadingFile(StoreHelper helper) {
-        try {
-            if (!permissionManager.hasPermission(context)) {
-                onRequestPermission(helper, false);
-                return;
-            }
-        } catch (PermissionUndefinedException e) {
-            helper.result.error(
-                    ErrorCodes.permissionDefinitionsNotFound.toString(),
-                    ErrorCodes.permissionDefinitionsNotFound.toDescription(),
-                    null);
-            return;
-        }
+        // Permission will handle by other packages (examples:https://pub.dev/packages/permission_handler)
+        //        try {
+        //            if (!permissionManager.hasPermission(context)) {
+        //                onRequestPermission(helper, false);
+        //                return;
+        //            }
+        //        } catch (PermissionUndefinedException e) {
+        //            helper.result.error(
+        //                    ErrorCodes.permissionDefinitionsNotFound.toString(),
+        //                    ErrorCodes.permissionDefinitionsNotFound.toDescription(),
+        //                    null);
+        //            return;
+        //        }
 
         Map<String, Object> map = (Map<String, Object>) helper.call.arguments;
         lastURL = helper.call.argument("url");
