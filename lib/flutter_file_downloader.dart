@@ -71,6 +71,7 @@ class FileDownloader {
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
+    final bool autoHandlePermission = true,
   }) async {
     return FileDownloader()
         ._downloadFile(
@@ -79,6 +80,7 @@ class FileDownloader {
           onProgress: onProgress,
           onDownloadCompleted: onDownloadCompleted,
           onDownloadError: onDownloadError,
+          autoHandlePermission: autoHandlePermission,
         )
         .catchError((error) => throw error);
   }
@@ -133,6 +135,7 @@ class FileDownloader {
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
+    final bool autoHandlePermission = true,
   }) async {
     if (!Platform.isAndroid) {
       debugPrint(
@@ -162,6 +165,7 @@ class FileDownloader {
         if (onProgress != null) 'onprogress_named': 'valid function',
         'ondownloadcompleted': 'valid function',
         if (onDownloadError != null) 'ondownloaderror': 'valid function',
+        'autoHandlePermission': autoHandlePermission,
       });
       if (result is String &&
           result.isNotEmpty &&

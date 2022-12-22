@@ -49,7 +49,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     private Activity activity;
 
     private String lastURL, lastName;
-//    private MethodCall lastCall;
+    //    private MethodCall lastCall;
 //    public MethodChannel.Result lastResult;
     private final Map<Long, DownloadCallbacks> tasks = new HashMap<>();
     private final Map<String, StoreHelper> stored = new HashMap<>();
@@ -63,10 +63,10 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     @Nullable
     private MethodChannel channel;
 
-    public StoreHelper findHelper(final long id){
+    public StoreHelper findHelper(final long id) {
         final String toFind = String.valueOf(id);
-        for(final String key: stored.keySet()){
-            if((toFind+"").equals(stored.get(key).id+"")) return  stored.get(key);
+        for (final String key : stored.keySet()) {
+            if ((toFind + "").equals(stored.get(key).id + "")) return stored.get(key);
         }
         return null;
     }
@@ -137,8 +137,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                             if (sendResult) {
                                 helper.result.success(permission.toInt());
                                 stored.remove(helper.call.argument("key"));
-                            }
-                            else {
+                            } else {
                                 if (permission != StoragePermission.always) {
                                     ErrorCodes errorCode = ErrorCodes.permissionDenied;
                                     helper.result.error(errorCode.toString(), errorCode.toDescription(), null);
@@ -157,19 +156,21 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     }
 
     private void onStartDownloadingFile(StoreHelper helper) {
-        // Permission will handle by other packages (examples:https://pub.dev/packages/permission_handler)
-        //        try {
-        //            if (!permissionManager.hasPermission(context)) {
-        //                onRequestPermission(helper, false);
-        //                return;
-        //            }
-        //        } catch (PermissionUndefinedException e) {
-        //            helper.result.error(
-        //                    ErrorCodes.permissionDefinitionsNotFound.toString(),
-        //                    ErrorCodes.permissionDefinitionsNotFound.toDescription(),
-        //                    null);
-        //            return;
-        //        }
+        final boolean autoHandlePermission = Boolean.TRUE.equals(helper.call.argument("autoHandlePermission"));
+        if (autoHandlePermission) {
+            try {
+                if (!permissionManager.hasPermission(context)) {
+                    onRequestPermission(helper, false);
+                    return;
+                }
+            } catch (PermissionUndefinedException e) {
+                helper.result.error(
+                        ErrorCodes.permissionDefinitionsNotFound.toString(),
+                        ErrorCodes.permissionDefinitionsNotFound.toDescription(),
+                        null);
+                return;
+            }
+        }
 
         Map<String, Object> map = (Map<String, Object>) helper.call.arguments;
         lastURL = helper.call.argument("url");
