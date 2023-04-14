@@ -1,4 +1,4 @@
-package com.example.flutter_file_downloader.permission;
+package com.odehbros.flutter_file_downloader.permission;
 
 import android.Manifest;
 import android.app.Activity;

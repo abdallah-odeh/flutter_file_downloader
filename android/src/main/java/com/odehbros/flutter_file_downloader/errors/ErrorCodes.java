@@ -1,4 +1,4 @@
-package com.example.flutter_file_downloader.errors;
+package com.odehbros.flutter_file_downloader.errors;
 
 public enum ErrorCodes {
     activityMissing,

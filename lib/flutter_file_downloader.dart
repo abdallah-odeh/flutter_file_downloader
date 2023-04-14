@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 
 import 'download_callbacks.dart';
 
+part 'download_task.dart';
+
 ///FlutterFileDownloader core file that handles native calls
 class FileDownloader {
   static FileDownloader? _instance;
@@ -57,8 +59,8 @@ class FileDownloader {
   ///To print logs for downloading status & callbacks
   static void setLogEnabled(final bool enabled) => _enableLog = enabled;
 
-  ///[url]: the file url you want to download
-  ///[name]: the file name after download, this will be file name inside your dowloads directory
+  ///[url] the file url you want to download
+  ///[name] the file name after download, this will be file name inside your dowloads directory
   ///        if this was null, then the last segment of the url will be used as the name
   ///        the name can be written with the extension, if not, the extension will be extracted from the url
   ///[onProgress] when the download progress change, you can update your UI or do anything you want
@@ -83,8 +85,8 @@ class FileDownloader {
         .catchError((error) => throw error);
   }
 
-  ///[urls]: a list of urls to files to be downloaded
-  ///[onAllDownloaded]: this callback will be triggered once all files downloaded are done
+  ///[urls] a list of urls to files to be downloaded
+  ///[onAllDownloaded] this callback will be triggered once all files downloaded are done
   ///                   note that some of the files might fail downloading
   ///                   and the files will be in the same order of the urls
   ///                   a filed to download file will be null at it's index
@@ -112,6 +114,7 @@ class FileDownloader {
             }).catchError((error) {
           tasks[i] = true;
           if (!tasks.contains(false)) completer.complete();
+          return null;
         });
       }
       await completer.future;
@@ -140,7 +143,8 @@ class FileDownloader {
       return Future.value(null);
     }
     if (!(Uri.tryParse(url)?.hasAbsolutePath ?? false)) {
-      throw ('URL is not valid, "$url" is not a valid url, please double check it then try again');
+      throw Exception(
+          'URL is not valid, "$url" is not a valid url, please double check it then try again');
     }
     final task = _DownloadTask(
       url: url.trim(),
@@ -245,27 +249,4 @@ class FileDownloader {
   int get maximumParallelDownloads => _maximumParallelDownloads;
 
   bool get isLogEnabled => _enableLog;
-}
-
-///The download task model to store some unique vars
-class _DownloadTask {
-  late final String id;
-  late final int key;
-  final String url;
-  final String? name;
-  final DownloadCallbacks callbacks;
-
-  final Completer _completer;
-
-  _DownloadTask({required this.url, required this.callbacks, this.name})
-      : //key = DateTime.now().millisecondsSinceEpoch.toString(),
-        _completer = Completer();
-
-  bool get isDownloaded => _completer.isCompleted;
-
-  //To download until this specific task is fully downloaded
-  Future waitDownload() => _completer.future;
-
-  //To notify observers that this task is fully downloaded
-  void notifyDownloaded() => _completer.complete();
 }

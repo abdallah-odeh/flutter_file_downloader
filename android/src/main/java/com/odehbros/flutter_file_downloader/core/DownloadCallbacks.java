@@ -1,4 +1,4 @@
-package com.example.flutter_file_downloader.core;
+package com.odehbros.flutter_file_downloader.core;
 
 public class DownloadCallbacks {
     public long id;

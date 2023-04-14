@@ -1,4 +1,4 @@
-package com.example.flutter_file_downloader;
+package com.odehbros.flutter_file_downloader;
 
 import android.app.DownloadManager;
 import android.content.ComponentName;
@@ -11,8 +11,8 @@ import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.flutter_file_downloader.permission.PermissionManager;
-import com.example.flutter_file_downloader.core.DownloadCompleterBroadcast;
+import com.odehbros.flutter_file_downloader.permission.PermissionManager;
+import com.odehbros.flutter_file_downloader.core.DownloadCompleterBroadcast;
 
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;

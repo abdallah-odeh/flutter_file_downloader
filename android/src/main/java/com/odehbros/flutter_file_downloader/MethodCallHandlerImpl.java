@@ -1,4 +1,4 @@
-package com.example.flutter_file_downloader;
+package com.odehbros.flutter_file_downloader;
 
 import android.app.Activity;
 import android.content.Context;
@@ -20,15 +20,15 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.flutter_file_downloader.errors.ErrorCodes;
-import com.example.flutter_file_downloader.errors.PermissionUndefinedException;
-import com.example.flutter_file_downloader.permission.StoragePermission;
-import com.example.flutter_file_downloader.permission.PermissionManager;
-import com.example.flutter_file_downloader.permission.PermissionResultCallback;
-import com.example.flutter_file_downloader.core.DownloadCallbacks;
-import com.example.flutter_file_downloader.core.DownloadTaskBuilder;
-import com.example.flutter_file_downloader.core.DownloadTask;
-import com.example.flutter_file_downloader.StoreHelper;
+import com.odehbros.flutter_file_downloader.errors.ErrorCodes;
+import com.odehbros.flutter_file_downloader.errors.PermissionUndefinedException;
+import com.odehbros.flutter_file_downloader.permission.StoragePermission;
+import com.odehbros.flutter_file_downloader.permission.PermissionManager;
+import com.odehbros.flutter_file_downloader.permission.PermissionResultCallback;
+import com.odehbros.flutter_file_downloader.core.DownloadCallbacks;
+import com.odehbros.flutter_file_downloader.core.DownloadTaskBuilder;
+import com.odehbros.flutter_file_downloader.core.DownloadTask;
+import com.odehbros.flutter_file_downloader.StoreHelper;
 
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;

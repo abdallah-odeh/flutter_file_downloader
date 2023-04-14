@@ -1,4 +1,4 @@
-package com.example.flutter_file_downloader.core;
+package com.odehbros.flutter_file_downloader.core;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -8,8 +8,8 @@ import android.database.Cursor;
 import android.os.Environment;
 import android.util.Log;
 
-import com.example.flutter_file_downloader.MethodCallHandlerImpl;
-import com.example.flutter_file_downloader.StoreHelper;
+import com.odehbros.flutter_file_downloader.MethodCallHandlerImpl;
+import com.odehbros.flutter_file_downloader.StoreHelper;
 
 public class DownloadCompleterBroadcast extends BroadcastReceiver {
 

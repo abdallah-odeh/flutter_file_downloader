@@ -1,4 +1,4 @@
-package com.example.flutter_file_downloader.core;
+package com.odehbros.flutter_file_downloader.core;
 
 import android.app.Activity;
 import android.app.DownloadManager;

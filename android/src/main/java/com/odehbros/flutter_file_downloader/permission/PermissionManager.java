@@ -1,8 +1,9 @@
-package com.example.flutter_file_downloader.permission;
+package com.odehbros.flutter_file_downloader.permission;
 
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
@@ -12,11 +13,13 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.flutter_file_downloader.errors.ErrorCallback;
-import com.example.flutter_file_downloader.errors.ErrorCodes;
-import com.example.flutter_file_downloader.errors.PermissionUndefinedException;
+import com.odehbros.flutter_file_downloader.errors.ErrorCallback;
+import com.odehbros.flutter_file_downloader.errors.ErrorCodes;
+import com.odehbros.flutter_file_downloader.errors.PermissionUndefinedException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @SuppressWarnings("deprecation")
 public class PermissionManager
@@ -24,12 +27,21 @@ public class PermissionManager
 
     private static final int PERMISSION_REQUEST_CODE = 109;
 
-    @Nullable private Activity activity;
-    @Nullable private ErrorCallback errorCallback;
-    @Nullable private PermissionResultCallback resultCallback;
+    @Nullable
+    private Activity activity;
+    @Nullable
+    private ErrorCallback errorCallback;
+    @Nullable
+    private PermissionResultCallback resultCallback;
 
     public StoragePermission checkPermissionStatus(Context context)
             throws PermissionUndefinedException {
+        // if the targetSdkVersion was set to 33+, then there is no need to request the permission as it's already granted
+        if (getTargetSdkVersion(context) >= 33) {
+            return StoragePermission.always;
+        }
+
+
         List<String> permissions = getStoragePermissionsFromManifest(context);
 
         int permissionStatus = PackageManager.PERMISSION_DENIED;
@@ -190,5 +202,17 @@ public class PermissionManager
         StoragePermission StoragePermission = this.checkPermissionStatus(context);
 
         return StoragePermission == StoragePermission.always;
+    }
+
+
+    private int getTargetSdkVersion(final Context context) {
+        final String packageName = context.getPackageName();
+        final PackageManager packageManager = context.getPackageManager();
+        try {
+            final ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
+            return applicationInfo.targetSdkVersion;
+        } catch (PackageManager.NameNotFoundException e) {
+            return -1;
+        }
     }
 }

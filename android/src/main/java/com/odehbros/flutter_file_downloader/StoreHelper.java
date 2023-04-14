@@ -1,4 +1,4 @@
-package com.example.flutter_file_downloader;
+package com.odehbros.flutter_file_downloader;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
