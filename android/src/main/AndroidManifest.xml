@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.example.flutter_file_downloader">
+  package="com.odehbros.flutter_file_downloader">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
