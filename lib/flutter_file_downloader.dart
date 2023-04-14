@@ -137,9 +137,9 @@ class FileDownloader {
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
   }) async {
-    if (!Platform.isAndroid) {
+    if (!(Platform.isAndroid || Platform.isIOS)) {
       debugPrint(
-          '[flutter_file_downloader] this plugin currently supports only android platform');
+          '[flutter_file_downloader] this plugin currently supports only android & iOS platforms');
       return Future.value(null);
     }
     if (!(Uri.tryParse(url)?.hasAbsolutePath ?? false)) {
@@ -172,6 +172,7 @@ class FileDownloader {
           result.toLowerCase().startsWith('/storage/')) {
         return File(result);
       }
+      print('RES: $result');
     } catch (e) {
       debugPrint('downloadFile error: $e');
     }

@@ -49,24 +49,21 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     private Activity activity;
 
     private String lastURL, lastName;
-//    private MethodCall lastCall;
-//    public MethodChannel.Result lastResult;
     private final Map<Long, DownloadCallbacks> tasks = new HashMap<>();
     private final Map<String, StoreHelper> stored = new HashMap<>();
 
     MethodCallHandlerImpl(
             PermissionManager permissionManager) {
-        System.out.println("MethodCallHandlerImpl INSTANCE CREATED!!!");
         this.permissionManager = permissionManager;
     }
 
     @Nullable
     private MethodChannel channel;
 
-    public StoreHelper findHelper(final long id){
+    public StoreHelper findHelper(final long id) {
         final String toFind = String.valueOf(id);
-        for(final String key: stored.keySet()){
-            if((toFind+"").equals(stored.get(key).id+"")) return  stored.get(key);
+        for (final String key : stored.keySet()) {
+            if ((toFind + "").equals(stored.get(key).id + "")) return stored.get(key);
         }
         return null;
     }
@@ -137,8 +134,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                             if (sendResult) {
                                 helper.result.success(permission.toInt());
                                 stored.remove(helper.call.argument("key"));
-                            }
-                            else {
+                            } else {
                                 if (permission != StoragePermission.always) {
                                     ErrorCodes errorCode = ErrorCodes.permissionDenied;
                                     helper.result.error(errorCode.toString(), errorCode.toDescription(), null);

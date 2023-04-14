@@ -204,7 +204,6 @@ public class PermissionManager
         return StoragePermission == StoragePermission.always;
     }
 
-
     private int getTargetSdkVersion(final Context context) {
         final String packageName = context.getPackageName();
         final PackageManager packageManager = context.getPackageManager();
