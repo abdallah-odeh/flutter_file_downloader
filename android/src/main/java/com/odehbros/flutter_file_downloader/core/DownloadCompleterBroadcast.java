@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Environment;
-import android.util.Log;
 
 import com.odehbros.flutter_file_downloader.MethodCallHandlerImpl;
 import com.odehbros.flutter_file_downloader.StoreHelper;
@@ -15,7 +14,7 @@ public class DownloadCompleterBroadcast extends BroadcastReceiver {
 
     final MethodCallHandlerImpl methodCallHandler;
 
-    public DownloadCompleterBroadcast(final MethodCallHandlerImpl methodCallHandler){
+    public DownloadCompleterBroadcast(final MethodCallHandlerImpl methodCallHandler) {
         this.methodCallHandler = methodCallHandler;
     }
 
@@ -40,32 +39,32 @@ public class DownloadCompleterBroadcast extends BroadcastReceiver {
                                     .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                                     .getAbsolutePath() + "/" + file;
                             final DownloadCallbacks task = methodCallHandler.getTask(id);
-                            if(task != null){
+                            if (task != null) {
                                 task.onDownloadCompleted(path);
                             }
                             final StoreHelper helper = methodCallHandler.findHelper(id);
                             if (helper != null)
                                 helper.result.success(path);
                             else
-                                System.out.println("COULD NOT FIND HELPER WITH KEY: "+id);
+                                System.out.println("COULD NOT FIND HELPER WITH KEY: " + id);
                         } else {
                             int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
                             if (columnIndex > -1) {
                                 int message = cursor.getInt(columnIndex);
 
                                 final DownloadCallbacks task = methodCallHandler.getTask(id);
-                                if(task != null)
+                                if (task != null)
                                     task.onDownloadError(message + "");
 
                                 final StoreHelper helper = methodCallHandler.findHelper(id);
-                                if(helper != null)
-                                helper.result.error("Download file error", message + "", null);
+                                if (helper != null)
+                                    helper.result.error("Download file error", message + "", null);
                             }
                         }
                     }
                 }
                 methodCallHandler.removeTask(id);
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

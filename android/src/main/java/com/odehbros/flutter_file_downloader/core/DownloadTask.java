@@ -5,10 +5,9 @@ import android.app.DownloadManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
-import android.text.TextUtils;
-import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 
 public class DownloadTask {
     final Activity activity;
@@ -36,10 +35,6 @@ public class DownloadTask {
 
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, getDownloadedFileName());
 
-        String path = Environment
-                .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                .getAbsolutePath() + "/" + getDownloadedFileName();
-
         final DownloadManager manager = (DownloadManager) activity.getSystemService(activity.DOWNLOAD_SERVICE);
         final long downloadedID = manager.enqueue(request);
         if (callbacks != null) {
@@ -49,39 +44,50 @@ public class DownloadTask {
     }
 
     private void trackDownload(final DownloadManager manager, final long downloadID) {
-
         Handler uiThreadHandler = new Handler(Looper.getMainLooper());
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                double lastProgress = -1;
+        new Thread(() -> {
+            double lastProgress = -1;
 
-                while (isDownloading) {
+            while (isDownloading) {
+                DownloadManager.Query q = new DownloadManager.Query();
+                q.setFilterById(downloadID);
 
-                    DownloadManager.Query q = new DownloadManager.Query();
-                    q.setFilterById(downloadID);
-
-                    Cursor cursor = manager.query(q);
-                    cursor.moveToFirst();
-                    int bytes_downloaded = cursor.getInt(cursor
-                            .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-                    int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-
-                    if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
-                        isDownloading = false;
-                    }
-
-                    final double dl_progress = (int) ((bytes_downloaded * 100l) / bytes_total);
-//                    System.out.println("DOWNLOADED: "+bytes_downloaded+", TOTAL: "+bytes_total);
-                    if (lastProgress != dl_progress) {
+                Cursor cursor = manager.query(q);
+                cursor.moveToFirst();
+                final int downloadedCursorColumnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
+                final int totalCursorColumnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);
+                final int statusColumnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                int bytesDownloaded;
+                int bytesTotal;
+                int status;
+                try {
+                    bytesDownloaded = cursor.getInt(downloadedCursorColumnIndex);
+                    bytesTotal = cursor.getInt(totalCursorColumnIndex);
+                    status = cursor.getInt(statusColumnIndex);
+                } catch (Exception e) {
+                    isDownloading = false;
+                    if (callbacks != null) {
                         uiThreadHandler.post(() -> {
-                            callbacks.onProgress(dl_progress);
-                            callbacks.onProgress(getDownloadedFileName(), dl_progress);
+                            callbacks.onDownloadError("Download canceled or failed due to network issues");
                         });
-                        lastProgress = dl_progress;
                     }
-                    cursor.close();
+                    break;
                 }
+                if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                    isDownloading = false;
+                }
+
+                final double progress = (int) ((bytesDownloaded * 100L) / bytesTotal);
+                if (lastProgress != progress) {
+                    if (callbacks != null) {
+                        uiThreadHandler.post(() -> {
+                            callbacks.onProgress(progress);
+                            callbacks.onProgress(getDownloadedFileName(), progress);
+                        });
+                    }
+                    lastProgress = progress;
+                }
+                cursor.close();
             }
         }).start();
     }
