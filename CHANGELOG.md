@@ -1,4 +1,3 @@
-## 1.1.1
+## 1.1.2
 
-Fixed issue to increase plugin rate on pub.dev
-Fixed permission issue in android 11+
+Fixed issue when canceling a download task the app crash
