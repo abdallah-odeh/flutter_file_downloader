@@ -2,40 +2,26 @@ package com.odehbros.flutter_file_downloader;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
-//import android.Manifest;
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.odehbros.flutter_file_downloader.errors.ErrorCodes;
-import com.odehbros.flutter_file_downloader.errors.PermissionUndefinedException;
-import com.odehbros.flutter_file_downloader.permission.StoragePermission;
-import com.odehbros.flutter_file_downloader.permission.PermissionManager;
-import com.odehbros.flutter_file_downloader.permission.PermissionResultCallback;
 import com.odehbros.flutter_file_downloader.core.DownloadCallbacks;
 import com.odehbros.flutter_file_downloader.core.DownloadTaskBuilder;
-import com.odehbros.flutter_file_downloader.core.DownloadTask;
-import com.odehbros.flutter_file_downloader.StoreHelper;
+import com.odehbros.flutter_file_downloader.errors.ErrorCodes;
+import com.odehbros.flutter_file_downloader.errors.PermissionUndefinedException;
+import com.odehbros.flutter_file_downloader.permission.PermissionManager;
+import com.odehbros.flutter_file_downloader.permission.PermissionResultCallback;
+import com.odehbros.flutter_file_downloader.permission.StoragePermission;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
-
-import java.util.Map;
-import java.util.HashMap;
 
 public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
 
@@ -49,8 +35,6 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     private Activity activity;
 
     private String lastURL, lastName;
-//    private MethodCall lastCall;
-//    public MethodChannel.Result lastResult;
     private final Map<Long, DownloadCallbacks> tasks = new HashMap<>();
     private final Map<String, StoreHelper> stored = new HashMap<>();
 
@@ -63,10 +47,10 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     @Nullable
     private MethodChannel channel;
 
-    public StoreHelper findHelper(final long id){
+    public StoreHelper findHelper(final long id) {
         final String toFind = String.valueOf(id);
-        for(final String key: stored.keySet()){
-            if((toFind+"").equals(stored.get(key).id+"")) return  stored.get(key);
+        for (final String key : stored.keySet()) {
+            if ((toFind + "").equals(stored.get(key).id + "")) return stored.get(key);
         }
         return null;
     }
@@ -131,21 +115,17 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         try {
             permissionManager.requestPermission(
                     activity,
-                    new PermissionResultCallback() {
-                        @Override
-                        public void onResult(StoragePermission permission) {
-                            if (sendResult) {
-                                helper.result.success(permission.toInt());
+                    permission -> {
+                        if (sendResult) {
+                            helper.result.success(permission.toInt());
+                            stored.remove(helper.call.argument("key"));
+                        } else {
+                            if (permission != StoragePermission.always) {
+                                ErrorCodes errorCode = ErrorCodes.permissionDenied;
+                                helper.result.error(errorCode.toString(), errorCode.toDescription(), null);
                                 stored.remove(helper.call.argument("key"));
-                            }
-                            else {
-                                if (permission != StoragePermission.always) {
-                                    ErrorCodes errorCode = ErrorCodes.permissionDenied;
-                                    helper.result.error(errorCode.toString(), errorCode.toDescription(), null);
-                                    stored.remove(helper.call.argument("key"));
-                                } else
-                                    onMethodCall(helper.call, helper.result);
-                            }
+                            } else
+                                onMethodCall(helper.call, helper.result);
                         }
                     },
                     (ErrorCodes errorCode) ->

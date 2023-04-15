@@ -37,7 +37,7 @@ public class PermissionManager
     public StoragePermission checkPermissionStatus(Context context)
             throws PermissionUndefinedException {
         // if the targetSdkVersion was set to 33+, then there is no need to request the permission as it's already granted
-        if (getTargetSdkVersion(context) >= 33) {
+        if (getTargetSdkVersion(context) >= Build.VERSION_CODES.TIRAMISU) {
             return StoragePermission.always;
         }
 
