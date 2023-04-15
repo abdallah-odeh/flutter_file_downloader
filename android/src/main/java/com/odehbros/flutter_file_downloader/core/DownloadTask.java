@@ -82,7 +82,6 @@ public class DownloadTask {
                     }
                     cursor.close();
                 }
-
             }
         }).start();
     }
