@@ -74,7 +74,8 @@ class FileDownloader {
   static Future<File?> downloadFile({
     required final String url,
     final String? name,
-    final DownloadDestinations downloadDestination = DownloadDestinations.publicDownloads,
+    final DownloadDestinations downloadDestination =
+        DownloadDestinations.publicDownloads,
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
@@ -103,7 +104,8 @@ class FileDownloader {
   ///                   a filed to download file will be null at it's index
   static Future<List<File?>> downloadFiles({
     required final List<String> urls,
-    final DownloadDestinations downloadDestination = DownloadDestinations.publicDownloads,
+    final DownloadDestinations downloadDestination =
+        DownloadDestinations.publicDownloads,
     final bool isParallel = true,
     final VoidCallback? onAllDownloaded,
   }) async {
@@ -149,7 +151,8 @@ class FileDownloader {
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
-    final DownloadDestinations downloadDestination = DownloadDestinations.publicDownloads,
+    final DownloadDestinations downloadDestination =
+        DownloadDestinations.publicDownloads,
   }) async {
     if (!Platform.isAndroid) {
       debugPrint(
