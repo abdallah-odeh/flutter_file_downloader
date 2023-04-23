@@ -9,31 +9,31 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 
+import io.flutter.util.PathUtils;
+
 public class DownloadTask {
     final Activity activity;
-    final String url, name;
+    final String url, name, downloadDestination;
     final DownloadCallbacks callbacks;
     private boolean isDownloading = false;
 
-    public DownloadTask(Activity activity, String url, String name, DownloadCallbacks callbacks) {
+    public DownloadTask(Activity activity, String url, String name, String downloadDestination, DownloadCallbacks callbacks) {
         this.callbacks = callbacks;
         this.activity = activity;
         this.url = url;
         this.name = name;
-    }
-
-    public DownloadTask(Activity activity, String url, String name) {
-        this.activity = activity;
-        this.url = url;
-        this.name = name;
-        callbacks = null;
+        this.downloadDestination = downloadDestination;
     }
 
     public void startDownloading() {
         isDownloading = true;
         final DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, getDownloadedFileName());
+        if ("app_files".equals(downloadDestination)) {
+            request.setDestinationInExternalFilesDir(activity, PathUtils.getFilesDir(activity), getDownloadedFileName());
+        } else {
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, getDownloadedFileName());
+         }
 
         final DownloadManager manager = (DownloadManager) activity.getSystemService(activity.DOWNLOAD_SERVICE);
         final long downloadedID = manager.enqueue(request);

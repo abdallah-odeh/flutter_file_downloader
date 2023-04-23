@@ -13,7 +13,6 @@ import com.odehbros.flutter_file_downloader.core.DownloadTaskBuilder;
 import com.odehbros.flutter_file_downloader.errors.ErrorCodes;
 import com.odehbros.flutter_file_downloader.errors.PermissionUndefinedException;
 import com.odehbros.flutter_file_downloader.permission.PermissionManager;
-import com.odehbros.flutter_file_downloader.permission.PermissionResultCallback;
 import com.odehbros.flutter_file_downloader.permission.StoragePermission;
 
 import java.util.HashMap;
@@ -34,13 +33,11 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     @Nullable
     private Activity activity;
 
-    private String lastURL, lastName;
     private final Map<Long, DownloadCallbacks> tasks = new HashMap<>();
     private final Map<String, StoreHelper> stored = new HashMap<>();
 
     MethodCallHandlerImpl(
             PermissionManager permissionManager) {
-        System.out.println("MethodCallHandlerImpl INSTANCE CREATED!!!");
         this.permissionManager = permissionManager;
     }
 
@@ -150,13 +147,14 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
             return;
         }
 
-        Map<String, Object> map = (Map<String, Object>) helper.call.arguments;
-        lastURL = helper.call.argument("url");
-        lastName = helper.call.argument("name");
+        String lastURL = helper.call.argument("url");
+        String lastName = helper.call.argument("name");
+        String lastDestination = helper.call.argument("download_destination");
 
         new DownloadTaskBuilder(activity)
                 .setUrl(lastURL)
                 .setName(lastName)
+                .setDownloadDestination(lastDestination)
                 .setCallbacks(new DownloadCallbacks() {
                     @Override
                     public void onIDReceived(long id) {

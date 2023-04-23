@@ -1,3 +1,3 @@
-## 1.1.2
+## 1.1.3-dev.1
 
-Fixed issue when canceling a download task the app crash
+Added support for download destinations, currently only public downloads and app file are supported

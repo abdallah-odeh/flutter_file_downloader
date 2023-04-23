@@ -14,8 +14,8 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
   final TextEditingController name = TextEditingController();
   final TextEditingController url = TextEditingController(
     text:
-    // 'http://www.africau.edu/images/default/sample.pdf',
-    'https://helpx.adobe.com/content/dam/help/en/photoshop/using/convert-color-image-black-white/jcr_content/main-pars/before_and_after/image-before/Landscape-Color.jpg',
+        // 'http://www.africau.edu/images/default/sample.pdf',
+        'https://helpx.adobe.com/content/dam/help/en/photoshop/using/convert-color-image-black-white/jcr_content/main-pars/before_and_after/image-before/Landscape-Color.jpg',
   );
 
   @override
@@ -45,31 +45,34 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
               decoration: const InputDecoration(label: Text('File name')),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: () async {
-              FileDownloader.downloadFile(
-                  url: url.text.trim(),
-                  name: name.text.trim(),
-                  onProgress: (name, progress) {
-                    setState(() {
-                      _progress = progress;
-                      _status = 'Progress: $progress%';
-                    });
-                  },
-                  onDownloadCompleted: (path) {
-                    setState(() {
-                      _progress = null;
-                      _status = 'File downloaded to: $path';
-                    });
-                  },
-                  onDownloadError: (error) {
-                    setState(() {
-                      _progress = null;
-                      _status = 'Download error: $error';
-                    });
-                  }).then((file) {
-                debugPrint('file path: ${file?.path}');
-              });
-            }, child: const Text('Download')),
+            ElevatedButton(
+                onPressed: () async {
+                  FileDownloader.downloadFile(
+                      url: url.text.trim(),
+                      name: name.text.trim(),
+                      downloadDestination: DownloadDestinations.appFiles,
+                      onProgress: (name, progress) {
+                        setState(() {
+                          _progress = progress;
+                          _status = 'Progress: $progress%';
+                        });
+                      },
+                      onDownloadCompleted: (path) {
+                        setState(() {
+                          _progress = null;
+                          _status = 'File downloaded to: $path';
+                        });
+                      },
+                      onDownloadError: (error) {
+                        setState(() {
+                          _progress = null;
+                          _status = 'Download error: $error';
+                        });
+                      }).then((file) {
+                    debugPrint('file path: ${file?.path}');
+                  });
+                },
+                child: const Text('Download')),
           ],
         ),
       ),

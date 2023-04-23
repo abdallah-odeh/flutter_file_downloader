@@ -128,10 +128,10 @@ class _MultipleDownloadsState extends State<MultipleDownloads> {
                       onPressed: () async {
                         setState(() => loading = true);
                         final files = await FileDownloader.downloadFiles(
-                          urls: tasks.map((e) => e.url).toList(),
-                          isParallel: isParallel,
-                          onAllDownloaded: ()=> setState(() => loading = false)
-                        );
+                            urls: tasks.map((e) => e.url).toList(),
+                            isParallel: isParallel,
+                            onAllDownloaded: () =>
+                                setState(() => loading = false));
                         for (int i = 0; i < files.length; i++) {
                           tasks[i].path = files[i]?.path;
                           tasks[i].finishedDownloading = true;

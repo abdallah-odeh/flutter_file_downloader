@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 
 import 'download_callbacks.dart';
 
+part 'download_destinations.dart';
+
 part 'download_task.dart';
 
 ///FlutterFileDownloader core file that handles native calls
@@ -63,6 +65,8 @@ class FileDownloader {
   ///[name] the file name after download, this will be file name inside your dowloads directory
   ///        if this was null, then the last segment of the url will be used as the name
   ///        the name can be written with the extension, if not, the extension will be extracted from the url
+  ///[downloadDestination] the desired download location, this can either be public download directory (Default)
+  ///                       or the app's private files directory
   ///[onProgress] when the download progress change, you can update your UI or do anything you want
   ///             Note, some devices or urls jumps from 0 to 100 in one step
   ///[onDownloadCompleted] When the download is complete, this callback will be fired holding the file path
@@ -70,6 +74,7 @@ class FileDownloader {
   static Future<File?> downloadFile({
     required final String url,
     final String? name,
+    final DownloadDestinations downloadDestination = DownloadDestinations.publicDownloads,
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
@@ -81,17 +86,24 @@ class FileDownloader {
           onProgress: onProgress,
           onDownloadCompleted: onDownloadCompleted,
           onDownloadError: onDownloadError,
+          downloadDestination: downloadDestination,
         )
         .catchError((error) => throw error);
   }
 
   ///[urls] a list of urls to files to be downloaded
+  ///[downloadDestination] the desired download location, this can either be public download directory (Default)
+  ///                       or the app's private files directory
+  ///[isParallel] this indicates that the download process must be parallel or
+  ///             download file by file to reduce device's resource consumption
+  ///             if this is set to true (Default), this will not exceed [MaximumParallelDownloads] (25 by default)
   ///[onAllDownloaded] this callback will be triggered once all files downloaded are done
   ///                   note that some of the files might fail downloading
   ///                   and the files will be in the same order of the urls
   ///                   a filed to download file will be null at it's index
   static Future<List<File?>> downloadFiles({
     required final List<String> urls,
+    final DownloadDestinations downloadDestination = DownloadDestinations.publicDownloads,
     final bool isParallel = true,
     final VoidCallback? onAllDownloaded,
   }) async {
@@ -103,6 +115,7 @@ class FileDownloader {
         result[i] = null;
         downloadFile(
             url: urls[i],
+            downloadDestination: downloadDestination,
             onDownloadCompleted: (path) {
               result[i] = File(path);
               tasks[i] = true;
@@ -136,6 +149,7 @@ class FileDownloader {
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
+    final DownloadDestinations downloadDestination = DownloadDestinations.publicDownloads,
   }) async {
     if (!Platform.isAndroid) {
       debugPrint(
@@ -149,6 +163,7 @@ class FileDownloader {
     final task = _DownloadTask(
       url: url.trim(),
       name: name?.trim(),
+      downloadDestination: downloadDestination,
       callbacks: DownloadCallbacks(
         onProgress: onProgress,
         onDownloadCompleted: onDownloadCompleted,
@@ -162,6 +177,7 @@ class FileDownloader {
       final result = await _platform.invokeMethod('downloadFile', {
         'url': url.trim(),
         'key': task.key.toString(),
+        'download_destination': task.downloadDestination.nativeName,
         if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
         if (onProgress != null) 'onprogress_named': 'valid function',
         'ondownloadcompleted': 'valid function',

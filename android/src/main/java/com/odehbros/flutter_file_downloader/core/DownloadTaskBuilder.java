@@ -4,7 +4,7 @@ import android.app.Activity;
 
 public class DownloadTaskBuilder {
     DownloadTaskBuilder instance;
-    String url, name;
+    String url, name, downloadDestination;
     DownloadCallbacks callbacks;
     final Activity activity;
     private DownloadTask task;
@@ -24,6 +24,12 @@ public class DownloadTaskBuilder {
         return instance;
     }
 
+
+    public DownloadTaskBuilder setDownloadDestination(final String downloadDestination) {
+        instance.downloadDestination = downloadDestination;
+        return instance;
+    }
+
     public DownloadTaskBuilder setCallbacks(final DownloadCallbacks callbacks) {
         instance.callbacks = callbacks;
         return instance;
@@ -31,7 +37,7 @@ public class DownloadTaskBuilder {
 
     public DownloadTask build() {
         if (task == null)
-            task = new DownloadTask(instance.activity, instance.url, instance.name, callbacks);
+            task = new DownloadTask(instance.activity, instance.url, instance.name, instance.downloadDestination, callbacks);
         try {
             return getDownloadTask();
         } catch (Exception e) {

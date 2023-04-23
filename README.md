@@ -16,7 +16,7 @@ First, make sure that you've added the permissions to your AndroidManifest.xml
 ```
 
 Add the following line to your pubspec.yaml  
-``` flutter_file_downloader: ^1.1.2```
+``` flutter_file_downloader: ^1.1.3-dev.1```
 
 Next,  
     add the library import to your dart file,  
@@ -69,6 +69,19 @@ FileDownloader.setMaximumParallelDownloads(10);
     //default is 25, maximum is 25, minimum is 1
 ```
 
+Also, you can change the download destination by passing downloadDestination,
+this can by one of the enum's values:
+`DownloadDestinations.publicDownloads //(DEFAULT)` 
+`DownloadDestinations.appFiles`
+## Example:
+```
+FileDownloader.downloadFile(
+    url: url.text.trim(),
+    name: name.text.trim(),
+    downloadDestination: DownloadDestinations.appFiles,
+);
+```
+<br></br>
 **All callbacks are nullables, you can simply call** `FileDownloader.downloadFile(YOUR_URL);`
 
 ## Examples:
