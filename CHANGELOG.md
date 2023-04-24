@@ -1,3 +1,4 @@
-## 1.1.3-dev.2
+## 1.1.3-dev.3
 
-Fixed pub.dev analysis, removed unused code & libraries
+- Fixed build exception
+- Fixed issue when download is complete, the native code does not return the file path back to flutter
