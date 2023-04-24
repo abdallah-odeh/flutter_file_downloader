@@ -30,7 +30,7 @@ Last step,
 //You can download a single file
 FileDownloader.downloadFile(
     url: _YOUR DOWNLOAD URL_,
-    name: **OPTIONAL**, _THE FILE NAME AFTER DOWNLOADING_,
+    name: **OPTIONAL**, //THE FILE NAME AFTER DOWNLOADING,
     onProgress: (String fileName, double progress) {
       print('FILE fileName HAS PROGRESS $progress');
     },
@@ -41,31 +41,31 @@ FileDownloader.downloadFile(
       print('DOWNLOAD ERROR: $error');
     });
     
-//Or download multiple of files 
+//Or download multiple files 
 final List<File?> result = await FileDownloader.downloadFiles(
     urls: [
         'https://cdn.mos.cms.futurecdn.net/vChK6pTy3vN3KbYZ7UU7k3-320-80.jpg',
         'https://fansided.com/files/2015/10/cat.jpg',
     ],
     isParallel: true,   //if this is set to true, your download list will request to be downloaded all at once
-                        //if your downloading queue fits them all, they are all will start downloading
+                        //if your downloading queue fits them all, they all will start downloading
                         //if it's set to false, it will download every file individually
                         //default is true
     onAllDownloaded: () {
-      //This callback will be fired when all files are done
+      //This callback will be fired when all files are downloaded
     });
     //This method will return a list of File? in the same order as the urls,
     //so if the url[2] failed to download, 
-    //them result[2] will be null
+    //then result[2] will be null
     
 //Also, you can enable or disable the log, this will help you track your download batches
 FileDownloader.setLogEnabled(true);
-    //default is false
+//default is false
 
 //You can set the number of consecutive downloads to help you preserving device's resources 
 FileDownloader.setMaximumParallelDownloads(10);
     //This method will allow the plugin to download 10 files at a time
-    //if your requested to download more than that, it will wait until a download is done to start another
+    //if you requested to download more than that, it will wait until a download is done to start another
     //default is 25, maximum is 25, minimum is 1
 ```
 
