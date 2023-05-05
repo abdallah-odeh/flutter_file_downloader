@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_file_downloader/flutter_file_downloader.dart';
+import 'package:flutter_file_downloader_example/sesstion_settings.dart';
+
+import 'preferences_manager.dart';
 
 class SingleDownloadScreen extends StatefulWidget {
   const SingleDownloadScreen({Key? key}) : super(key: key);
@@ -11,11 +14,12 @@ class SingleDownloadScreen extends StatefulWidget {
 class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
   double? _progress;
   String _status = '';
+  final SessionSettings settings = SessionSettings();
   final TextEditingController name = TextEditingController();
   final TextEditingController url = TextEditingController(
-    text:
-        // 'http://www.africau.edu/images/default/sample.pdf',
-        'https://helpx.adobe.com/content/dam/help/en/photoshop/using/convert-color-image-black-white/jcr_content/main-pars/before_and_after/image-before/Landscape-Color.jpg',
+    text: 'https://research.nhm.org/pdfs/10840/10840-002.pdf',
+    // 'http://www.africau.edu/images/default/sample.pdf',
+    // 'https://helpx.adobe.com/content/dam/help/en/photoshop/using/convert-color-image-black-white/jcr_content/main-pars/before_and_after/image-before/Landscape-Color.jpg',
   );
 
   @override
@@ -50,7 +54,8 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
                   FileDownloader.downloadFile(
                       url: url.text.trim(),
                       name: name.text.trim(),
-                      downloadDestination: DownloadDestinations.appFiles,
+                      downloadDestination: settings.downloadDestination,
+                      notificationType: settings.notificationType,
                       onProgress: (name, progress) {
                         setState(() {
                           _progress = progress;

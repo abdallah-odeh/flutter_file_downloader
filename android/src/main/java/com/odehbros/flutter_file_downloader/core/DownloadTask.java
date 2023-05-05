@@ -2,12 +2,14 @@ package com.odehbros.flutter_file_downloader.core;
 
 import android.app.Activity;
 import android.app.DownloadManager;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 
 import io.flutter.util.PathUtils;
 
@@ -15,31 +17,53 @@ public class DownloadTask {
     final Activity activity;
     final String url, name, downloadDestination;
     final DownloadCallbacks callbacks;
+    final String notifications;
     private boolean isDownloading = false;
 
-    public DownloadTask(Activity activity, String url, String name, String downloadDestination, DownloadCallbacks callbacks) {
-        this.callbacks = callbacks;
+    public DownloadTask(Activity activity, String url, String name, String notifications, String downloadDestination, DownloadCallbacks callbacks) {
         this.activity = activity;
         this.url = url;
         this.name = name;
+        this.notifications = notifications;
         this.downloadDestination = downloadDestination;
+        this.callbacks = callbacks;
     }
 
-    public void startDownloading() {
+    public void startDownloading(final Context context) {
         isDownloading = true;
         final DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
-        if ("app_files".equals(downloadDestination)) {
+        if ("appFiles".equals(downloadDestination)) {
             request.setDestinationInExternalFilesDir(activity, PathUtils.getFilesDir(activity), getDownloadedFileName());
-        } else {
+        } else if ("publicDownloads".equals(downloadDestination)) {
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, getDownloadedFileName());
-         }
-
+        }
+        if ("disabled".equals(notifications)) {
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
+        } else if ("all".equals(notifications)) {
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        } else if ("progressOnly".equals(notifications)) {
+            //DO NOTHING (DEFAULT CASE)
+        }
         final DownloadManager manager = (DownloadManager) activity.getSystemService(activity.DOWNLOAD_SERVICE);
-        final long downloadedID = manager.enqueue(request);
-        if (callbacks != null) {
-            callbacks.onIDReceived(downloadedID);
-            trackDownload(manager, downloadedID);
+        try {
+            final long downloadedID = manager.enqueue(request);
+            if (callbacks != null) {
+                callbacks.onIDReceived(downloadedID);
+                trackDownload(manager, downloadedID);
+            }
+        } catch (Exception e) {
+            Handler uiThreadHandler = new Handler(Looper.getMainLooper());
+            if (e instanceof SecurityException) {
+                Log.e("MISSING PERMISSION", "If you want to download a file without notifications, you must provide the permission\n<uses-permission android:name=\"android.permission.DOWNLOAD_WITHOUT_NOTIFICATION\" />");
+                uiThreadHandler.post(() -> {
+                    callbacks.onDownloadError("Missing permission, see the log for more info");
+                });
+            } else {
+                uiThreadHandler.post(() -> {
+                    callbacks.onDownloadError(e.getMessage());
+                });
+            }
         }
     }
 

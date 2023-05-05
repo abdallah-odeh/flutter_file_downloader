@@ -6,6 +6,7 @@ class _DownloadTask {
   late final int key;
   final String url;
   final String? name;
+  final NotificationType notificationType;
   final DownloadDestinations downloadDestination;
   final DownloadCallbacks callbacks;
 
@@ -15,6 +16,7 @@ class _DownloadTask {
     required this.url,
     required this.callbacks,
     this.name,
+    this.notificationType = NotificationType.progressOnly,
     this.downloadDestination = DownloadDestinations.publicDownloads,
   }) : //key = DateTime.now().millisecondsSinceEpoch.toString(),
         _completer = Completer();

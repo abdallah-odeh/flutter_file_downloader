@@ -41,7 +41,6 @@ public class PermissionManager
             return StoragePermission.always;
         }
 
-
         List<String> permissions = getStoragePermissionsFromManifest(context);
 
         int permissionStatus = PackageManager.PERMISSION_DENIED;
@@ -182,16 +181,16 @@ public class PermissionManager
 
     private static List<String> getStoragePermissionsFromManifest(Context context)
             throws PermissionUndefinedException {
-        boolean fineStoragePermissionExists =
+        boolean writeStoragePermissionExists =
                 PermissionUtils.hasPermissionInManifest(context, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-        if (!fineStoragePermissionExists) {
+        if (!writeStoragePermissionExists) {
             throw new PermissionUndefinedException();
         }
 
         List<String> permissions = new ArrayList<>();
 
-        if (fineStoragePermissionExists) {
+        if (writeStoragePermissionExists) {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
 

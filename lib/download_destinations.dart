@@ -13,21 +13,4 @@ enum DownloadDestinations {
   ///or unintentionally downloaded files,
   ///for example if the user clicked a video to save offline
   appFiles,
-  // publicDownloads('public_downloads'),
-  // appFiles('app_file');
-  //
-  // const DownloadDestinations(this.nativeName);
-  //
-  // final String nativeName;
-}
-
-extension _DestinationNames on DownloadDestinations {
-  String get nativeName {
-    switch (this) {
-      case DownloadDestinations.publicDownloads:
-        return 'public_downloads';
-      case DownloadDestinations.appFiles:
-        return 'app_files';
-    }
-  }
 }

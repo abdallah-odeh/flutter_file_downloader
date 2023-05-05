@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_file_downloader_example/multiple_downloads.dart';
+import 'package:flutter_file_downloader_example/preferences_manager.dart';
 import 'package:flutter_file_downloader_example/settings.dart';
 
 import 'single_download.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await PreferencesManager().initialize();
   runApp(const MyApp());
 }
 
@@ -22,7 +25,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      locale: Locale('ar'),
+      locale: const Locale('ar'),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Flutter file downloader example'),

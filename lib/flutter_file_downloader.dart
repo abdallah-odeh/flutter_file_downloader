@@ -10,6 +10,8 @@ part 'download_destinations.dart';
 
 part 'download_task.dart';
 
+part 'notification_types.dart';
+
 ///FlutterFileDownloader core file that handles native calls
 class FileDownloader {
   static FileDownloader? _instance;
@@ -28,12 +30,7 @@ class FileDownloader {
     _platform.setMethodCallHandler(_methodCallHandler);
   }
 
-  factory FileDownloader({
-    final bool enableLog = false,
-    final int maximumParallelDownloads = _upperLimitParallelDownloads,
-  }) {
-    setMaximumParallelDownloads(maximumParallelDownloads);
-    setLogEnabled(enableLog);
+  factory FileDownloader() {
     return _instance ??= FileDownloader._();
   }
 
@@ -74,6 +71,7 @@ class FileDownloader {
   static Future<File?> downloadFile({
     required final String url,
     final String? name,
+    final NotificationType notificationType = NotificationType.progressOnly,
     final DownloadDestinations downloadDestination =
         DownloadDestinations.publicDownloads,
     final OnProgress? onProgress,
@@ -84,10 +82,11 @@ class FileDownloader {
         ._downloadFile(
           url: url,
           name: name,
+          notificationType: notificationType,
+          downloadDestination: downloadDestination,
           onProgress: onProgress,
           onDownloadCompleted: onDownloadCompleted,
           onDownloadError: onDownloadError,
-          downloadDestination: downloadDestination,
         )
         .catchError((error) => throw error);
   }
@@ -104,6 +103,7 @@ class FileDownloader {
   ///                   a filed to download file will be null at it's index
   static Future<List<File?>> downloadFiles({
     required final List<String> urls,
+    final NotificationType notificationType = NotificationType.progressOnly,
     final DownloadDestinations downloadDestination =
         DownloadDestinations.publicDownloads,
     final bool isParallel = true,
@@ -117,6 +117,7 @@ class FileDownloader {
         result[i] = null;
         downloadFile(
             url: urls[i],
+            notificationType: notificationType,
             downloadDestination: downloadDestination,
             onDownloadCompleted: (path) {
               result[i] = File(path);
@@ -138,7 +139,11 @@ class FileDownloader {
     } else {
       final List<File?> result = [
         for (final url in urls)
-          await downloadFile(url: url).catchError((error) => null),
+          await downloadFile(
+            url: url,
+            notificationType: notificationType,
+            downloadDestination: downloadDestination,
+          ).catchError((error) => null),
       ];
       onAllDownloaded?.call();
       return result;
@@ -148,11 +153,11 @@ class FileDownloader {
   Future<File?> _downloadFile({
     required final String url,
     final String? name,
+    required final NotificationType notificationType,
+    required final DownloadDestinations downloadDestination,
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
-    final DownloadDestinations downloadDestination =
-        DownloadDestinations.publicDownloads,
   }) async {
     if (!Platform.isAndroid) {
       debugPrint(
@@ -166,6 +171,7 @@ class FileDownloader {
     final task = _DownloadTask(
       url: url.trim(),
       name: name?.trim(),
+      notificationType: notificationType,
       downloadDestination: downloadDestination,
       callbacks: DownloadCallbacks(
         onProgress: onProgress,
@@ -180,15 +186,14 @@ class FileDownloader {
       final result = await _platform.invokeMethod('downloadFile', {
         'url': url.trim(),
         'key': task.key.toString(),
-        'download_destination': task.downloadDestination.nativeName,
+        'notifications': task.notificationType.name,
+        'download_destination': task.downloadDestination.name,
         if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
         if (onProgress != null) 'onprogress_named': 'valid function',
         'ondownloadcompleted': 'valid function',
         if (onDownloadError != null) 'ondownloaderror': 'valid function',
       });
-      if (result is String &&
-          result.isNotEmpty &&
-          result.toLowerCase().startsWith('/storage/')) {
+      if (result is String && result.isNotEmpty) {
         return File(result);
       }
     } catch (e) {
@@ -255,7 +260,7 @@ class FileDownloader {
       });
     } else {
       _log(
-          'Task ${task.key} is quened because maximum parallel download is reached');
+          'Task ${task.key} is queued because maximum parallel download is reached');
       _waitingDownloads.add(task);
     }
   }
