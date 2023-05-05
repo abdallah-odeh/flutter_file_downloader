@@ -81,6 +81,23 @@ FileDownloader.downloadFile(
     downloadDestination: DownloadDestinations.appFiles,
 );
 ```
+
+And you can change download notifications to be:
+- all enabled: progress, success & failed notifications will be delivered to the user
+- all disabled: no notifications will be displayed to the user, this option require you to add a permission in the manifest `android.permission.DOWNLOAD_WITHOUT_NOTIFICATION`
+- or the default, only progress notifications will appear to the user
+this can by one of the enum's values:
+`NotificationType.all`
+`NotificationType.progressOnly //(DEFAULT)`
+`NotificationType.disabled`
+## Example:
+```
+FileDownloader.downloadFile(
+    url: url.text.trim(),
+    name: name.text.trim(),
+    notificationType: NotificationType.all,
+);
+```
 <br></br>
 **All callbacks are nullables, you can simply call** `FileDownloader.downloadFile(YOUR_URL);`
 
