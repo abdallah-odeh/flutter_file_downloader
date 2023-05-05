@@ -71,8 +71,8 @@ FileDownloader.setMaximumParallelDownloads(10);
 
 Also, you can change the download destination by passing downloadDestination,
 this can by one of the enum's values:
-`DownloadDestinations.publicDownloads //(DEFAULT)` 
-`DownloadDestinations.appFiles`
+- `DownloadDestinations.publicDownloads //(DEFAULT)` 
+- `DownloadDestinations.appFiles`
 ## Example:
 ```
 FileDownloader.downloadFile(
@@ -87,9 +87,9 @@ And you can change download notifications to be:
 - all disabled: no notifications will be displayed to the user, this option require you to add a permission in the manifest `android.permission.DOWNLOAD_WITHOUT_NOTIFICATION`
 - or the default, only progress notifications will appear to the user
 this can by one of the enum's values:
-`NotificationType.all`
-`NotificationType.progressOnly //(DEFAULT)`
-`NotificationType.disabled`
+- `NotificationType.all`
+- `NotificationType.progressOnly //(DEFAULT)`
+- `NotificationType.disabled`
 ## Example:
 ```
 FileDownloader.downloadFile(
@@ -99,9 +99,9 @@ FileDownloader.downloadFile(
 );
 ```
 <br></br>
-**All callbacks are nullables, you can simply call** `FileDownloader.downloadFile(YOUR_URL);`
 
 ## Examples:
+**All callbacks are nullables, you can simply call** `FileDownloader.downloadFile(url: YOUR_URL);`
 ```
 FileDownloader.downloadFile(
     url: "https://tinypng.com/images/social/website.jpg",
