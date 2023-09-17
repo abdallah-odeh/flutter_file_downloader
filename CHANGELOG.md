@@ -1,3 +1,4 @@
-## 1.1.2
+## 1.1.3-dev.4
 
-Fixed issue when canceling a download task the app crash
+- Added the ability to manage download notifications, you can now enable all notifications, disabled all or use the default (only progress notifications)
+- Cleaned some code and enhancements

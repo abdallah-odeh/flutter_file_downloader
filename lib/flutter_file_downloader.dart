@@ -6,7 +6,11 @@ import 'package:flutter/services.dart';
 
 import 'download_callbacks.dart';
 
+part 'download_destinations.dart';
+
 part 'download_task.dart';
+
+part 'notification_types.dart';
 
 ///FlutterFileDownloader core file that handles native calls
 class FileDownloader {
@@ -26,12 +30,7 @@ class FileDownloader {
     _platform.setMethodCallHandler(_methodCallHandler);
   }
 
-  factory FileDownloader({
-    final bool enableLog = false,
-    final int maximumParallelDownloads = _upperLimitParallelDownloads,
-  }) {
-    setMaximumParallelDownloads(maximumParallelDownloads);
-    setLogEnabled(enableLog);
+  factory FileDownloader() {
     return _instance ??= FileDownloader._();
   }
 
@@ -63,6 +62,8 @@ class FileDownloader {
   ///[name] the file name after download, this will be file name inside your dowloads directory
   ///        if this was null, then the last segment of the url will be used as the name
   ///        the name can be written with the extension, if not, the extension will be extracted from the url
+  ///[downloadDestination] the desired download location, this can either be public download directory (Default)
+  ///                       or the app's private files directory
   ///[onProgress] when the download progress change, you can update your UI or do anything you want
   ///             Note, some devices or urls jumps from 0 to 100 in one step
   ///[onDownloadCompleted] When the download is complete, this callback will be fired holding the file path
@@ -70,6 +71,9 @@ class FileDownloader {
   static Future<File?> downloadFile({
     required final String url,
     final String? name,
+    final NotificationType notificationType = NotificationType.progressOnly,
+    final DownloadDestinations downloadDestination =
+        DownloadDestinations.publicDownloads,
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
@@ -78,6 +82,8 @@ class FileDownloader {
         ._downloadFile(
           url: url,
           name: name,
+          notificationType: notificationType,
+          downloadDestination: downloadDestination,
           onProgress: onProgress,
           onDownloadCompleted: onDownloadCompleted,
           onDownloadError: onDownloadError,
@@ -86,12 +92,20 @@ class FileDownloader {
   }
 
   ///[urls] a list of urls to files to be downloaded
+  ///[downloadDestination] the desired download location, this can either be public download directory (Default)
+  ///                       or the app's private files directory
+  ///[isParallel] this indicates that the download process must be parallel or
+  ///             download file by file to reduce device's resource consumption
+  ///             if this is set to true (Default), this will not exceed [MaximumParallelDownloads] (25 by default)
   ///[onAllDownloaded] this callback will be triggered once all files downloaded are done
   ///                   note that some of the files might fail downloading
   ///                   and the files will be in the same order of the urls
   ///                   a filed to download file will be null at it's index
   static Future<List<File?>> downloadFiles({
     required final List<String> urls,
+    final NotificationType notificationType = NotificationType.progressOnly,
+    final DownloadDestinations downloadDestination =
+        DownloadDestinations.publicDownloads,
     final bool isParallel = true,
     final VoidCallback? onAllDownloaded,
   }) async {
@@ -103,6 +117,8 @@ class FileDownloader {
         result[i] = null;
         downloadFile(
             url: urls[i],
+            notificationType: notificationType,
+            downloadDestination: downloadDestination,
             onDownloadCompleted: (path) {
               result[i] = File(path);
               tasks[i] = true;
@@ -123,7 +139,11 @@ class FileDownloader {
     } else {
       final List<File?> result = [
         for (final url in urls)
-          await downloadFile(url: url).catchError((error) => null),
+          await downloadFile(
+            url: url,
+            notificationType: notificationType,
+            downloadDestination: downloadDestination,
+          ).catchError((error) => null),
       ];
       onAllDownloaded?.call();
       return result;
@@ -133,6 +153,8 @@ class FileDownloader {
   Future<File?> _downloadFile({
     required final String url,
     final String? name,
+    required final NotificationType notificationType,
+    required final DownloadDestinations downloadDestination,
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
@@ -149,6 +171,8 @@ class FileDownloader {
     final task = _DownloadTask(
       url: url.trim(),
       name: name?.trim(),
+      notificationType: notificationType,
+      downloadDestination: downloadDestination,
       callbacks: DownloadCallbacks(
         onProgress: onProgress,
         onDownloadCompleted: onDownloadCompleted,
@@ -162,14 +186,14 @@ class FileDownloader {
       final result = await _platform.invokeMethod('downloadFile', {
         'url': url.trim(),
         'key': task.key.toString(),
+        'notifications': task.notificationType.name,
+        'download_destination': task.downloadDestination.name,
         if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
         if (onProgress != null) 'onprogress_named': 'valid function',
         'ondownloadcompleted': 'valid function',
         if (onDownloadError != null) 'ondownloaderror': 'valid function',
       });
-      if (result is String &&
-          result.isNotEmpty &&
-          result.toLowerCase().startsWith('/storage/')) {
+      if (result is String && result.isNotEmpty) {
         return File(result);
       }
     } catch (e) {
@@ -236,7 +260,7 @@ class FileDownloader {
       });
     } else {
       _log(
-          'Task ${task.key} is quened because maximum parallel download is reached');
+          'Task ${task.key} is queued because maximum parallel download is reached');
       _waitingDownloads.add(task);
     }
   }

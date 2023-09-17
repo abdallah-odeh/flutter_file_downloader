@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_file_downloader/flutter_file_downloader.dart';
+import 'package:flutter_file_downloader_example/sesstion_settings.dart';
+
+import 'preferences_manager.dart';
 
 class MultipleDownloads extends StatefulWidget {
   const MultipleDownloads({Key? key}) : super(key: key);
@@ -10,6 +13,7 @@ class MultipleDownloads extends StatefulWidget {
 
 class _MultipleDownloadsState extends State<MultipleDownloads> {
   final controller = TextEditingController();
+  final SessionSettings settings = SessionSettings();
   final List<_DownloadTask> tasks = [];
   bool isParallel = true, loading = false;
 
@@ -128,10 +132,12 @@ class _MultipleDownloadsState extends State<MultipleDownloads> {
                       onPressed: () async {
                         setState(() => loading = true);
                         final files = await FileDownloader.downloadFiles(
-                          urls: tasks.map((e) => e.url).toList(),
-                          isParallel: isParallel,
-                          onAllDownloaded: ()=> setState(() => loading = false)
-                        );
+                            urls: tasks.map((e) => e.url).toList(),
+                            isParallel: isParallel,
+                            downloadDestination: settings.downloadDestination,
+                            notificationType: settings.notificationType,
+                            onAllDownloaded: () =>
+                                setState(() => loading = false));
                         for (int i = 0; i < files.length; i++) {
                           tasks[i].path = files[i]?.path;
                           tasks[i].finishedDownloading = true;
