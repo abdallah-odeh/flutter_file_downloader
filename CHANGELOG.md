@@ -1,4 +1,3 @@
-## 1.1.3
+## 1.2.0-dev.1
 
-- Added the ability to manage download notifications, you can now enable all notifications, disabled all or use the default (only progress notifications)
-- Enhanced Sample codes
+- Added support to pass headers with download file request

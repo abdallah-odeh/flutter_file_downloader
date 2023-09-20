@@ -3,13 +3,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_file_downloader/download_file_request.dart';
 
 import 'download_callbacks.dart';
 
 part 'download_destinations.dart';
-
 part 'download_task.dart';
-
 part 'notification_types.dart';
 
 ///FlutterFileDownloader core file that handles native calls
@@ -74,6 +73,7 @@ class FileDownloader {
     final NotificationType notificationType = NotificationType.progressOnly,
     final DownloadDestinations downloadDestination =
         DownloadDestinations.publicDownloads,
+    final Map<String, String> headers = const {},
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
@@ -84,6 +84,7 @@ class FileDownloader {
           name: name,
           notificationType: notificationType,
           downloadDestination: downloadDestination,
+          headers: headers,
           onProgress: onProgress,
           onDownloadCompleted: onDownloadCompleted,
           onDownloadError: onDownloadError,
@@ -108,6 +109,7 @@ class FileDownloader {
         DownloadDestinations.publicDownloads,
     final bool isParallel = true,
     final VoidCallback? onAllDownloaded,
+    final Map<String, String> headers = const {},
   }) async {
     if (isParallel) {
       final result = <int, File?>{};
@@ -119,6 +121,7 @@ class FileDownloader {
             url: urls[i],
             notificationType: notificationType,
             downloadDestination: downloadDestination,
+            headers: headers,
             onDownloadCompleted: (path) {
               result[i] = File(path);
               tasks[i] = true;
@@ -142,6 +145,72 @@ class FileDownloader {
           await downloadFile(
             url: url,
             notificationType: notificationType,
+            headers: headers,
+            downloadDestination: downloadDestination,
+          ).catchError((error) => null),
+      ];
+      onAllDownloaded?.call();
+      return result;
+    }
+  }
+
+  /// A batch-download request method to pass a different headers for each file
+  ///
+  /// this method is used when you have multiple files to download
+  /// and [DownloadFileRequest.headers] are different for each download request
+  ///
+  /// takes:
+  /// - [requests] a List of [DownloadFileRequest] to download
+  /// - [notificationType] to manage download progress notifications; default is [NotificationType.progressOnly]
+  /// - [downloadDestination] to determine where to download these files, public downloads directory or app directory (temp files)
+  /// - [isParallel] to manage requests flow, whether parallel or not; default is true
+  /// - [onAllDownloaded] a callback when batch download is done
+  ///
+  /// returns:
+  /// - an array of nullable [File] in the same order of the requests
+  static Future<List<File?>> downloadFilesWithCustomHeaders({
+    required final List<DownloadFileRequest> requests,
+    final NotificationType notificationType = NotificationType.progressOnly,
+    final DownloadDestinations downloadDestination =
+        DownloadDestinations.publicDownloads,
+    final bool isParallel = true,
+    final VoidCallback? onAllDownloaded,
+  }) async {
+    if (isParallel) {
+      final result = <int, File?>{};
+      final tasks = List<bool>.generate(requests.length, (_) => false);
+      final completer = Completer();
+      for (int i = 0; i < requests.length; i++) {
+        result[i] = null;
+        downloadFile(
+            url: requests[i].url,
+            notificationType: notificationType,
+            downloadDestination: downloadDestination,
+            headers: requests[i].headers,
+            onDownloadCompleted: (path) {
+              result[i] = File(path);
+              tasks[i] = true;
+              if (!tasks.contains(false)) completer.complete();
+            },
+            onDownloadError: (error) {
+              tasks[i] = true;
+              if (!tasks.contains(false)) completer.complete();
+            }).catchError((error) {
+          tasks[i] = true;
+          if (!tasks.contains(false)) completer.complete();
+          return null;
+        });
+      }
+      await completer.future;
+      onAllDownloaded?.call();
+      return result.values.toList();
+    } else {
+      final List<File?> result = [
+        for (final request in requests)
+          await downloadFile(
+            url: request.url,
+            notificationType: notificationType,
+            headers: request.headers,
             downloadDestination: downloadDestination,
           ).catchError((error) => null),
       ];
@@ -155,6 +224,7 @@ class FileDownloader {
     final String? name,
     required final NotificationType notificationType,
     required final DownloadDestinations downloadDestination,
+    final Map<String, String> headers = const {},
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
@@ -192,6 +262,7 @@ class FileDownloader {
         if (onProgress != null) 'onprogress_named': 'valid function',
         'ondownloadcompleted': 'valid function',
         if (onDownloadError != null) 'ondownloaderror': 'valid function',
+        'headers': headers,
       });
       if (result is String && result.isNotEmpty) {
         return File(result);
