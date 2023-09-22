@@ -7,9 +7,7 @@ import 'package:flutter/services.dart';
 import 'download_callbacks.dart';
 
 part 'download_destinations.dart';
-
 part 'download_task.dart';
-
 part 'notification_types.dart';
 
 ///FlutterFileDownloader core file that handles native calls
@@ -189,9 +187,9 @@ class FileDownloader {
         'notifications': task.notificationType.name,
         'download_destination': task.downloadDestination.name,
         if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
-        if (onProgress != null) 'onprogress_named': 'valid function',
-        'ondownloadcompleted': 'valid function',
-        if (onDownloadError != null) 'ondownloaderror': 'valid function',
+        'onprogress_named': onProgress?.toString(),
+        'ondownloadcompleted': onDownloadCompleted?.toString(),
+        'ondownloaderror': onDownloadError?.toString(),
       });
       if (result is String && result.isNotEmpty) {
         return File(result);

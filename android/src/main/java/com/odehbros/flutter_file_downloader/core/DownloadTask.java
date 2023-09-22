@@ -101,6 +101,16 @@ public class DownloadTask {
                     isDownloading = false;
                 }
 
+                if (bytesTotal == 0) {
+                    isDownloading = false;
+                    if (callbacks != null) {
+                        uiThreadHandler.post(() -> {
+                            callbacks.onDownloadError("File size is Zero!");
+                        });
+                    }
+                    break;
+                }
+
                 final double progress = (int) ((bytesDownloaded * 100L) / bytesTotal);
                 if (lastProgress != progress) {
                     if (callbacks != null) {
