@@ -121,7 +121,7 @@ final List<File?> files = await FileDownloader.downloadFiles(
     headers: {'Authorization': 'Basic ...'}
 );
 
-/// using bulck download, this will send the same headers for every download link in the array
+/// using bulck download, this will send a different headers for every download link in the array
 final List<File?> files = await FileDownloader.downloadFilesWithCustomHeaders(requests: [
     DownloadFileRequest(downloadUrls[0], headers: {'Authorization': 'Basic token1'}),
     DownloadFileRequest(downloadUrls[1], headers: {'Authorization': 'Basic token2'}),
