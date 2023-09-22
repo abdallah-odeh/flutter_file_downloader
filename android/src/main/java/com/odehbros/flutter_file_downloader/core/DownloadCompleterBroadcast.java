@@ -33,16 +33,17 @@ public class DownloadCompleterBroadcast extends BroadcastReceiver {
                         int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
                         if (status == DownloadManager.STATUS_SUCCESSFUL) {
                             final DownloadCallbacks task = methodCallHandler.getTask(id);
+                            String downloadPath = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                            downloadPath = downloadPath.replace("file://", "");
                             if (task != null) {
-                                task.onDownloadCompleted(cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)));
+                                task.onDownloadCompleted(downloadPath);
                             }
                             final StoreHelper helper = methodCallHandler.findHelper(id);
                             if (helper != null) {
-                                final String path = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-                                helper.result.success(path);
-                            }
-                            else
+                                helper.result.success(downloadPath);
+                            } else {
                                 System.out.println("COULD NOT FIND HELPER WITH KEY: " + id);
+                            }
                         } else {
                             int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
                             if (columnIndex > -1) {
