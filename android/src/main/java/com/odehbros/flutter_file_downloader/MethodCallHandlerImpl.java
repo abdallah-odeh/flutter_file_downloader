@@ -151,11 +151,13 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         String lastName = helper.call.argument("name");
         String lastDestination = helper.call.argument("download_destination");
         String notifications = helper.call.argument("notifications");
+        Map<String, String> requestHeaders = helper.call.argument("headers");
 
         new DownloadTaskBuilder(activity)
                 .setUrl(lastURL)
                 .setName(lastName)
                 .setShowNotifications(notifications)
+                .setRequestHeaders(requestHeaders)
                 .setDownloadDestination(lastDestination)
                 .setCallbacks(new DownloadCallbacks() {
                     @Override
