@@ -259,9 +259,6 @@ class FileDownloader {
         'notifications': task.notificationType.name,
         'download_destination': task.downloadDestination.name,
         if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
-        'onprogress_named': onProgress?.toString(),
-        'ondownloadcompleted': onDownloadCompleted?.toString(),
-        'ondownloaderror': onDownloadError?.toString(),
         'headers': headers,
       });
       if (result is String && result.isNotEmpty) {
@@ -293,7 +290,7 @@ class FileDownloader {
       case 'onDownloadCompleted':
         _log(
             'Task ${call.arguments['key']} is downloaded in: ${call.arguments['path']}');
-        _downloadTasks[key]?.notifyDownloaded();
+        _downloadTasks[key]?.notifyCompleted(true);
         _downloadTasks[key]
             ?.callbacks
             .onDownloadCompleted
@@ -303,6 +300,7 @@ class FileDownloader {
       case 'onDownloadError':
         _log(
             'Task ${call.arguments['key']} failed to download: ${call.arguments['error']}');
+        _downloadTasks[key]?.notifyCompleted(false);
         _downloadTasks[key]
             ?.callbacks
             .onDownloadError

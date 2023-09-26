@@ -10,7 +10,7 @@ class _DownloadTask {
   final DownloadDestinations downloadDestination;
   final DownloadCallbacks callbacks;
 
-  final Completer _completer;
+  final Completer<bool> _completer;
 
   _DownloadTask({
     required this.url,
@@ -19,7 +19,7 @@ class _DownloadTask {
     this.notificationType = NotificationType.progressOnly,
     this.downloadDestination = DownloadDestinations.publicDownloads,
   }) : //key = DateTime.now().millisecondsSinceEpoch.toString(),
-        _completer = Completer();
+        _completer = Completer<bool>();
 
   bool get isDownloaded => _completer.isCompleted;
 
@@ -27,5 +27,5 @@ class _DownloadTask {
   Future waitDownload() => _completer.future;
 
   //To notify observers that this task is fully downloaded
-  void notifyDownloaded() => _completer.complete();
+  void notifyCompleted(final bool success) => _completer.complete(success);
 }

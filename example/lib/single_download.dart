@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 import 'package:flutter_file_downloader_example/sesstion_settings.dart';
 
-import 'preferences_manager.dart';
-
 class SingleDownloadScreen extends StatefulWidget {
   const SingleDownloadScreen({Key? key}) : super(key: key);
 

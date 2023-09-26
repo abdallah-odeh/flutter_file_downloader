@@ -60,7 +60,6 @@ public class DownloadCompleterBroadcast extends BroadcastReceiver {
                         }
                     }
                 }
-                methodCallHandler.removeTask(id);
             } catch (Exception e) {
                 e.printStackTrace();
             }
