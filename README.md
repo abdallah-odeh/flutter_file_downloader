@@ -7,6 +7,15 @@ so I came up with a simple ANDROID plugin to downloads any file type to download
 Also it has callbacks and progress listeners with a very easy installation
 Note: This plugin is not built for iOS, it will not effect it at all.
 
+## Features:
+
+- Ability to change file name once downloaded
+- Ability to start a bulk download
+- Ability to pass headers with each download task
+- Ability to manage download notifications (all/progress only/off)
+- Ability to determine where to download (public downloads/app directory)
+- Ability to track download progress
+
 ## Getting Started
 
 First, make sure that you've added the permissions to your AndroidManifest.xml
