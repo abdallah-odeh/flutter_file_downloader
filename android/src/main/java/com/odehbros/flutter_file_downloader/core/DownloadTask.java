@@ -11,9 +11,11 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.util.List;
 import java.util.Map;
 
 import io.flutter.util.PathUtils;
+
 import com.odehbros.flutter_file_downloader.StoreHelper;
 
 public class DownloadTask {
@@ -38,13 +40,17 @@ public class DownloadTask {
 
     public void startDownloading(final Context context) {
         isDownloading = true;
+        final Uri uri = Uri.parse(url);
+        final List<String> path = uri.getPathSegments();
+        final String originalName = path.get(path.size() - 1);
         final DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
-        final String downloadFileName = getDownloadedFileName();
-        final String fixedDownloadedFileName = fixDownloadFileName(downloadFileName);
+        final String downloadName = getDownloadFileName(name, originalName);
 
-        if (TextUtils.isEmpty(fixedDownloadedFileName)) {
-            final String message = "Invalid file name "+downloadFileName+" -> "+fixedDownloadedFileName+" try changing the download file name";
+        Log.e("DOWNLOAD FILE NAME", downloadName);
+
+        if (TextUtils.isEmpty(downloadName)) {
+            final String message = "Invalid file name " + downloadName + " try changing the download file name";
             new Handler(Looper.getMainLooper()).post(() -> {
                 callbacks.onDownloadError(message);
             });
@@ -52,12 +58,14 @@ public class DownloadTask {
             return;
         }
 
-
+        //set download destination
         if ("appFiles".equals(downloadDestination)) {
-            request.setDestinationInExternalFilesDir(activity, PathUtils.getFilesDir(activity), fixedDownloadedFileName);
+            request.setDestinationInExternalFilesDir(activity, PathUtils.getFilesDir(activity), downloadName);
         } else if ("publicDownloads".equals(downloadDestination)) {
-            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fixedDownloadedFileName);
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, downloadName);
         }
+
+        //set notification status
         if ("disabled".equals(notifications)) {
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
         } else if ("all".equals(notifications)) {
@@ -65,20 +73,26 @@ public class DownloadTask {
         } else if ("progressOnly".equals(notifications)) {
             //DO NOTHING (DEFAULT CASE)
         }
+
+        //append headers
         for (final Map.Entry<String, String> entry : requestHeaders.entrySet()) {
             request.addRequestHeader(entry.getKey(), entry.getValue());
         }
+
+        //declare download manager instance with above configuration
         final DownloadManager manager = (DownloadManager) activity.getSystemService(activity.DOWNLOAD_SERVICE);
         try {
+            //start download
             final long downloadedID = manager.enqueue(request);
             if (callbacks != null) {
                 callbacks.onIDReceived(downloadedID);
+                //track download
                 trackDownload(manager, downloadedID);
             }
         } catch (Exception e) {
             String message;
             if (e.getMessage().startsWith("Unsupported path") || e.getMessage().startsWith("java.io.IOException: Invalid file path")) {
-                message = "Invalid file name "+getDownloadedFileName()+" try changing the download file name";
+                message = "Invalid file name " + downloadName + " try changing the download file name";
             } else if (e instanceof SecurityException) {
                 Log.e("MISSING PERMISSION", "If you want to download a file without notifications, you must provide the permission\n<uses-permission android:name=\"android.permission.DOWNLOAD_WITHOUT_NOTIFICATION\" />");
                 message = "Missing permission, see the log for more info";
@@ -107,13 +121,16 @@ public class DownloadTask {
                 final int downloadedCursorColumnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
                 final int totalCursorColumnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);
                 final int statusColumnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                final int downloadNameColumnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_TITLE);
                 int bytesDownloaded;
                 int bytesTotal;
                 int status;
+                 String downloadName;
                 try {
                     bytesDownloaded = cursor.getInt(downloadedCursorColumnIndex);
                     bytesTotal = cursor.getInt(totalCursorColumnIndex);
                     status = cursor.getInt(statusColumnIndex);
+                    downloadName = cursor.getString(downloadNameColumnIndex);
                 } catch (Exception e) {
                     isDownloading = false;
                     if (callbacks != null) {
@@ -142,7 +159,7 @@ public class DownloadTask {
                     if (callbacks != null) {
                         uiThreadHandler.post(() -> {
                             callbacks.onProgress(progress);
-                            callbacks.onProgress(getDownloadedFileName(), progress);
+                            callbacks.onProgress(downloadName, progress);
                         });
                     }
                     lastProgress = progress;
@@ -152,48 +169,8 @@ public class DownloadTask {
         }).start();
     }
 
-    private String getName() {
-        if (!TextUtils.isEmpty(name)) return name;
-        final String[] segments = url.split("/");
-        return segments[segments.length - 1];
-    }
-
-    private String getExtension() {
-//        String toCheck = name;
-//        if (!TextUtils.isEmpty(toCheck)) {
-//            if (!toCheck.contains(".")) {
-//                final String[] segments = url.split("/");
-//                toCheck = segments[segments.length - 1];
-//            }
-//        } else {
-//            toCheck = getName();
-//        }
-
-        final String[] segments = url.split("/");
-        String toCheck = segments[segments.length - 1];
-
-        return toCheck.substring(toCheck.lastIndexOf("."));
-    }
-
-    private String getDownloadedFileName() {
-        if (TextUtils.isEmpty(name)) return getName();
-        String name = getName();
-        final String extension = getExtension();
-        if (name.contains(".")) {
-            name = name.substring(0, name.lastIndexOf("."));
-//            name = fixDownloadFileName(name);
-        }
-        return String.format("%s.%s", name, extension.replace(".", ""));
-    }
-
     private String fixDownloadFileName(final String name) {
-        String extension = "";
-        if (name.contains(getExtension())) {
-            extension = name.substring(name.lastIndexOf("."));
-        }
-//        Log.i("FIXING FNAME", name + " -> "+ extension + " | " + getExtension());
         return name
-                .replace(extension, "")
                 .replace("#", "")
                 .replace("%", "")
                 .replace("*", "")
@@ -202,12 +179,46 @@ public class DownloadTask {
                 .replace("|", "")
                 .replace("\"", "")
                 .replace(":", "")
-                .replace(":", "")
                 .replace("/", "")
                 .replace("<", "")
                 .replace(">", "")
                 .replace("?", "")
-                .replace("&", "")
-                + getExtension();
+                .replace("&", "");
+    }
+
+    private String getDownloadFileName(final String sentName, final String originalName) {
+        Log.i("Getting file name", "sent: "+ sentName + " original: "+ originalName);
+
+        String name = null;
+        String extension = null;
+
+        if (!TextUtils.isEmpty(sentName)) {
+            name = extractFileName(sentName);
+//            extension = getExtensionFrom(sentName);
+        }
+
+        if (TextUtils.isEmpty(name)) {
+            name = extractFileName(originalName);
+        }
+
+        extension = getExtensionFrom(originalName);
+//        final String realExtension = getExtensionFrom(originalName);
+//        if (TextUtils.isEmpty(extension) || !realExtension.equals(extension)) {
+//            extension = realExtension;
+//        }
+
+        return String.format("%s.%s", name, extension.replace(".", ""));
+    }
+
+    private String getExtensionFrom(final String name) {
+        final String[] arr = name.split("\\.");
+        if (arr.length == 1) return null;
+        return arr[arr.length - 1];
+    }
+
+    private String extractFileName(final String name) {
+        Log.i("Extracting name from", "'"+name+"'");
+        final String[] terms = name.split("\\.");
+        return fixDownloadFileName(terms[0]);
     }
 }
