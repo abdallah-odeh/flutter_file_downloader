@@ -4,6 +4,7 @@ import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.database.Cursor;
 import android.os.Environment;
 
@@ -42,7 +43,7 @@ public class DownloadCompleterBroadcast extends BroadcastReceiver {
                             if (helper != null) {
                                 helper.result.success(downloadPath);
                             } else {
-                                System.out.println("COULD NOT FIND HELPER WITH KEY: " + id);
+                                Log.e("COULD NOT FIND HELPER WITH KEY", id + "");
                             }
                         } else {
                             int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);

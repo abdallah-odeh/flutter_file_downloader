@@ -1,6 +1,7 @@
 package com.odehbros.flutter_file_downloader;
 
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
@@ -76,6 +77,9 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
             case "onStartDownloadingFile":
             case "downloadFile":
                 onStartDownloadingFile(helper);
+                break;
+            case "cancelDownload":
+                cancelDownload(helper);
                 break;
             default:
                 result.notImplemented();
@@ -244,6 +248,23 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
 
     private void removeTask(final long id) {
         tasks.remove(id);
+    }
+
+    private void cancelDownload(final StoreHelper helper) {
+        final long id = Long.valueOf(helper.call.argument("id"));
+
+        final DownloadCallbacks task = tasks.get(id);
+        if (task == null) {
+            helper.result.error(
+                    "Download task not found",
+                    "Could not find an active download task with id " + id,
+                    null);
+            return;
+        }
+        task.onDownloadError("Download canceled");
+        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+        final int removedCount = downloadManager.remove(id);
+        helper.result.success(removedCount > 0);
     }
 
     public DownloadCallbacks getTask(final long id) {
