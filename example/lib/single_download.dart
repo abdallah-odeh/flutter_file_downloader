@@ -20,6 +20,8 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
     // 'https://helpx.adobe.com/content/dam/help/en/photoshop/using/convert-color-image-black-white/jcr_content/main-pars/before_and_after/image-before/Landscape-Color.jpg',
   );
 
+  int? _downloadId;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,35 +49,55 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
               decoration: const InputDecoration(label: Text('File name')),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-                onPressed: () async {
-                  FileDownloader.downloadFile(
-                      url: url.text.trim(),
-                      name: name.text.trim(),
-                      downloadDestination: settings.downloadDestination,
-                      notificationType: settings.notificationType,
-                      onProgress: (name, progress) {
-                        setState(() {
-                          _progress = progress;
-                          _status = 'Progress: $progress%';
-                        });
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                    onPressed: () async {
+                      FileDownloader.downloadFile(
+                          url: url.text.trim(),
+                          name: name.text.trim(),
+                          headers: {'Header': 'Test'},
+                          downloadDestination: settings.downloadDestination,
+                          notificationType: settings.notificationType,
+                          onDownloadRequestIdReceived: (id) {
+                            setState(() => _downloadId = id);
+                          },
+                          onProgress: (name, progress) {
+                            setState(() {
+                              _progress = progress;
+                              _status = 'Progress: $progress%';
+                            });
+                          },
+                          onDownloadCompleted: (path) {
+                            setState(() {
+                              _downloadId = null;
+                              _progress = null;
+                              _status = 'File downloaded to: $path';
+                            });
+                          },
+                          onDownloadError: (error) {
+                            setState(() {
+                              _progress = null;
+                              _status = 'Download error: $error';
+                            });
+                          }).then((file) {
+                        debugPrint('file path: ${file?.path}');
+                      });
+                    },
+                    child: const Text('Download')),
+                if (_downloadId != null) ...[
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                      onPressed: () async {
+                        final canceled =
+                            await FileDownloader.cancelDownload(_downloadId!);
+                        print('Canceled: $canceled');
                       },
-                      onDownloadCompleted: (path) {
-                        setState(() {
-                          _progress = null;
-                          _status = 'File downloaded to: $path';
-                        });
-                      },
-                      onDownloadError: (error) {
-                        setState(() {
-                          _progress = null;
-                          _status = 'Download error: $error';
-                        });
-                      }).then((file) {
-                    debugPrint('file path: ${file?.path}');
-                  });
-                },
-                child: const Text('Download')),
+                      child: const Text('Cancel')),
+                ]
+              ],
+            ),
           ],
         ),
       ),

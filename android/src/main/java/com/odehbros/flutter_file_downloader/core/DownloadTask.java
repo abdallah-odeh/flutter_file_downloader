@@ -47,8 +47,6 @@ public class DownloadTask {
 
         final String downloadName = getDownloadFileName(name, originalName);
 
-        Log.e("DOWNLOAD FILE NAME", downloadName);
-
         if (TextUtils.isEmpty(downloadName)) {
             final String message = "Invalid file name " + downloadName + " try changing the download file name";
             new Handler(Looper.getMainLooper()).post(() -> {
@@ -187,8 +185,6 @@ public class DownloadTask {
     }
 
     private String getDownloadFileName(final String sentName, final String originalName) {
-        Log.i("Getting file name", "sent: "+ sentName + " original: "+ originalName);
-
         String name = null;
         String extension = null;
 
@@ -217,7 +213,6 @@ public class DownloadTask {
     }
 
     private String extractFileName(final String name) {
-        Log.i("Extracting name from", "'"+name+"'");
         final String[] terms = name.split("\\.");
         return fixDownloadFileName(terms[0]);
     }

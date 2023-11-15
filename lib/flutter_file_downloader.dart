@@ -59,10 +59,13 @@ class FileDownloader {
 
   ///[url] the file url you want to download
   ///[name] the file name after download, this will be file name inside your dowloads directory
-  ///        if this was null, then the last segment of the url will be used as the name
-  ///        the name can be written with the extension, if not, the extension will be extracted from the url
+  ///       if this was null, then the last segment of the url will be used as the name
+  ///       the name can be written with the extension, if not, the extension will be extracted from the url
   ///[downloadDestination] the desired download location, this can either be public download directory (Default)
-  ///                       or the app's private files directory
+  ///                      or the app's private files directory
+  ///[onDownloadRequestIdReceived] triggered when downloading service get the task and returns the
+  ///                              new task id
+  ///                              this callback must be used when wanting to cancel the download
   ///[onProgress] when the download progress change, you can update your UI or do anything you want
   ///             Note, some devices or urls jumps from 0 to 100 in one step
   ///[onDownloadCompleted] When the download is complete, this callback will be fired holding the file path
@@ -74,6 +77,7 @@ class FileDownloader {
     final DownloadDestinations downloadDestination =
         DownloadDestinations.publicDownloads,
     final Map<String, String> headers = const {},
+    final OnDownloadRequestIdReceived? onDownloadRequestIdReceived,
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
@@ -85,6 +89,7 @@ class FileDownloader {
           notificationType: notificationType,
           downloadDestination: downloadDestination,
           headers: headers,
+          onDownloadRequestIdReceived: onDownloadRequestIdReceived,
           onProgress: onProgress,
           onDownloadCompleted: onDownloadCompleted,
           onDownloadError: onDownloadError,
@@ -219,12 +224,28 @@ class FileDownloader {
     }
   }
 
+  /// to cancel a download request by it's id
+  ///
+  /// [downloadId] the download task id to be canceled
+  static Future<bool> cancelDownload(final int downloadId) async {
+    try {
+      final result = await _platform.invokeMethod('cancelDownload', {
+        'id': '$downloadId',
+      });
+      return result as bool;
+    } catch (e) {
+      debugPrint('downloadFile error: $e');
+    }
+    return false;
+  }
+
   Future<File?> _downloadFile({
     required final String url,
     final String? name,
     required final NotificationType notificationType,
     required final DownloadDestinations downloadDestination,
     final Map<String, String> headers = const {},
+    final OnDownloadRequestIdReceived? onDownloadRequestIdReceived,
     final OnProgress? onProgress,
     final OnDownloadCompleted? onDownloadCompleted,
     final OnDownloadError? onDownloadError,
@@ -244,6 +265,7 @@ class FileDownloader {
       notificationType: notificationType,
       downloadDestination: downloadDestination,
       callbacks: DownloadCallbacks(
+        onDownloadRequestIdReceived: onDownloadRequestIdReceived,
         onProgress: onProgress,
         onDownloadCompleted: onDownloadCompleted,
         onDownloadError: onDownloadError,
@@ -260,6 +282,10 @@ class FileDownloader {
         'download_destination': task.downloadDestination.name,
         if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
         'headers': headers,
+        'onidreceived': onDownloadRequestIdReceived?.toString(),
+        'onprogress_named': onProgress?.toString(),
+        'ondownloadcompleted': onDownloadCompleted?.toString(),
+        'ondownloaderror': onDownloadError?.toString(),
       });
       if (result is String && result.isNotEmpty) {
         return File(result);
@@ -272,12 +298,16 @@ class FileDownloader {
 
   Future<void> _methodCallHandler(MethodCall call) async {
     final id = call.arguments['id'].toString();
-    final key = int.parse(call.arguments['key'].toString());
+    final int key = int.parse(call.arguments['key'].toString());
 
     switch (call.method) {
       case 'onIDReceived':
-        final key = call.arguments['key']?.toString();
+        _log('File ${call.arguments['url']} got the id $id');
         _downloadTasks[key]?.id = id;
+        _downloadTasks[key]
+            ?.callbacks
+            .onDownloadRequestIdReceived
+            ?.call(int.parse(id));
         break;
       case 'onProgress':
         _log(
