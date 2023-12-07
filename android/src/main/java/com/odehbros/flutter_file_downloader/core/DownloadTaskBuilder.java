@@ -2,12 +2,17 @@ package com.odehbros.flutter_file_downloader.core;
 
 import android.app.Activity;
 
+import java.util.Map;
+import com.odehbros.flutter_file_downloader.StoreHelper;
+
 public class DownloadTaskBuilder {
     String url, name, downloadDestination;
     String notifications = "progressOnly";
     DownloadCallbacks callbacks;
     final Activity activity;
     private DownloadTask task;
+    private Map<String, String> requestHeaders;
+    private StoreHelper helper;
 
     public DownloadTaskBuilder(final Activity activity) {
         this.activity = activity;
@@ -39,9 +44,19 @@ public class DownloadTaskBuilder {
         return this;
     }
 
+    public DownloadTaskBuilder setRequestHeaders(final Map<String, String> requestHeaders) {
+        this.requestHeaders = requestHeaders;
+        return this;
+    }
+
+    public DownloadTaskBuilder setStoreHelper(final StoreHelper helper) {
+        this.helper = helper;
+        return  this;
+    }
+
     public DownloadTask build() {
         if (task == null)
-            task = new DownloadTask(activity, url, name, notifications, downloadDestination, callbacks);
+            task = new DownloadTask(activity, url, name, notifications, downloadDestination, callbacks, requestHeaders, helper);
         try {
             return getDownloadTask();
         } catch (Exception e) {

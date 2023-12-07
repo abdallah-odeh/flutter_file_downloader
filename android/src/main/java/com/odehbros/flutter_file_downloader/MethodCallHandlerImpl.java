@@ -1,6 +1,7 @@
 package com.odehbros.flutter_file_downloader;
 
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
@@ -52,6 +53,16 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         return null;
     }
 
+    public void removeStoreHelper(final long id) {
+        final String toFind = String.valueOf(id);
+        for (final String key : stored.keySet()) {
+            if ((toFind + "").equals(stored.get(key).id + "")) {
+                stored.remove(key);
+                return;
+            }
+        }
+    }
+
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
         final StoreHelper helper = new StoreHelper(call, result);
@@ -66,6 +77,9 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
             case "onStartDownloadingFile":
             case "downloadFile":
                 onStartDownloadingFile(helper);
+                break;
+            case "cancelDownload":
+                cancelDownload(helper);
                 break;
             default:
                 result.notImplemented();
@@ -151,19 +165,20 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         String lastName = helper.call.argument("name");
         String lastDestination = helper.call.argument("download_destination");
         String notifications = helper.call.argument("notifications");
+        Map<String, String> requestHeaders = helper.call.argument("headers");
 
         new DownloadTaskBuilder(activity)
                 .setUrl(lastURL)
                 .setName(lastName)
                 .setShowNotifications(notifications)
+                .setRequestHeaders(requestHeaders)
                 .setDownloadDestination(lastDestination)
+                .setStoreHelper(helper)
                 .setCallbacks(new DownloadCallbacks() {
                     @Override
                     public void onIDReceived(long id) {
                         super.onIDReceived(id);
                         tasks.put(id, this);
-
-                        final String onProgress = helper.call.argument("onidreceived");
 
                         Map<String, Object> args = new HashMap();
 
@@ -178,9 +193,6 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     public void onProgress(double progress) {
                         super.onProgress(progress);
 
-                        final String onProgress = helper.call.argument("onprogress");
-
-                        if (TextUtils.isEmpty(onProgress)) return;
                         Map<String, Object> args = new HashMap();
 
                         args.put("id", id);
@@ -193,9 +205,6 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     public void onProgress(String name, double progress) {
                         super.onProgress(name, progress);
 
-                        final String onProgressWithName = helper.call.argument("onprogress_named");
-
-                        if (TextUtils.isEmpty(onProgressWithName)) return;
                         Map<String, Object> args = new HashMap();
 
                         args.put("id", id);
@@ -209,37 +218,53 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     public void onDownloadCompleted(String path) {
                         super.onDownloadCompleted(path);
 
-                        final String onDownloadCompleted = helper.call.argument("ondownloadcompleted");
-
-                        if (TextUtils.isEmpty(onDownloadCompleted)) return;
                         Map<String, Object> args = new HashMap();
 
                         args.put("id", id);
                         args.put("path", path);
                         args.put("key", helper.call.argument("key"));
                         channel.invokeMethod("onDownloadCompleted", args);
+
+                        removeTask(id);
                     }
 
                     @Override
                     public void onDownloadError(String errorMessage) {
                         super.onDownloadError(errorMessage);
-                        final String onDownloadError = helper.call.argument("ondownloaderror");
 
-                        if (TextUtils.isEmpty(onDownloadError)) return;
                         Map<String, Object> args = new HashMap();
 
                         args.put("id", id);
                         args.put("error", errorMessage);
                         args.put("key", helper.call.argument("key"));
                         channel.invokeMethod("onDownloadError", args);
+
+                        removeTask(id);
                     }
                 })
                 .build()
                 .startDownloading(context);
     }
 
-    public void removeTask(final long id) {
+    private void removeTask(final long id) {
         tasks.remove(id);
+    }
+
+    private void cancelDownload(final StoreHelper helper) {
+        final long id = Long.valueOf(helper.call.argument("id"));
+
+        final DownloadCallbacks task = tasks.get(id);
+        if (task == null) {
+            helper.result.error(
+                    "Download task not found",
+                    "Could not find an active download task with id " + id,
+                    null);
+            return;
+        }
+        task.onDownloadError("Download canceled");
+        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+        final int removedCount = downloadManager.remove(id);
+        helper.result.success(removedCount > 0);
     }
 
     public DownloadCallbacks getTask(final long id) {

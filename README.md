@@ -7,6 +7,15 @@ so I came up with a simple ANDROID plugin to downloads any file type to download
 Also it has callbacks and progress listeners with a very easy installation
 Note: This plugin is not built for iOS, it will not effect it at all.
 
+## Features:
+
+- Ability to change file name once downloaded
+- Ability to start a bulk download
+- Ability to pass headers with each download task
+- Ability to manage download notifications (all/progress only/off)
+- Ability to determine where to download (public downloads/app directory)
+- Ability to track download progress
+
 ## Getting Started
 
 First, make sure that you've added the permissions to your AndroidManifest.xml
@@ -16,7 +25,7 @@ First, make sure that you've added the permissions to your AndroidManifest.xml
 ```
 
 Add the following line to your pubspec.yaml  
-``` flutter_file_downloader: ^1.1.4```
+``` flutter_file_downloader: ^1.2.0-dev.4```
 
 Next,  
     add the library import to your dart file,  
@@ -29,8 +38,8 @@ Last step,
 ```
 //You can download a single file
 FileDownloader.downloadFile(
-    url: _YOUR DOWNLOAD URL_,
-    name: **OPTIONAL**, //THE FILE NAME AFTER DOWNLOADING,
+    url: "YOUR DOWNLOAD URL",
+    name: "THE FILE NAME AFTER DOWNLOADING",//(optional) 
     onProgress: (String fileName, double progress) {
       print('FILE fileName HAS PROGRESS $progress');
     },
@@ -58,7 +67,7 @@ final List<File?> result = await FileDownloader.downloadFiles(
     //so if the url[2] failed to download, 
     //then result[2] will be null
     
-//Also, you can enable or disable the log, this will help you track your download batches
+//You can enable or disable the log, this will help you track your download batches
 FileDownloader.setLogEnabled(true);
 //default is false
 
@@ -97,6 +106,37 @@ FileDownloader.downloadFile(
     name: name.text.trim(),
     notificationType: NotificationType.all,
 );
+```
+
+### v1.2.0+ changes:
+**You can now pass headers to your download request**
+```
+var downloadUrls = [
+    'https://fansided.com/files/2015/10/cat.jpg',
+    'https://i.pinimg.com/564x/b9/17/64/b91764a4a240c340bdd0f3ba452f384a.jpg',
+    'https://www.banningvet.com/files/banning_vet/puppies-kittens.jpg',
+    'https://tinypng.com/images/social/developer-api.jpg',
+];
+
+/// using a single download request
+final File? = await FileDownloader.downloadFile(
+    url: downloadUrls[0],
+    headers: {'Authorization': 'Basic ...'}
+);
+
+/// using bulck download, this will send the same headers for every download link in the array
+final List<File?> files = await FileDownloader.downloadFiles(
+    urls: downloadUrls,
+    headers: {'Authorization': 'Basic ...'}
+);
+
+/// using bulck download, this will send a different headers for every download link in the array
+final List<File?> files = await FileDownloader.downloadFilesWithCustomHeaders(requests: [
+    DownloadFileRequest(downloadUrls[0], headers: {'Authorization': 'Basic token1'}),
+    DownloadFileRequest(downloadUrls[1], headers: {'Authorization': 'Basic token2'}),
+    DownloadFileRequest(downloadUrls[2], headers: {'Authorization': 'Basic token3'}),
+    DownloadFileRequest(downloadUrls[3], headers: {'Authorization': 'Basic token4'}),
+])
 ```
 <br></br>
 
