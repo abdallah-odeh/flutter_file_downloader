@@ -25,7 +25,7 @@ First, make sure that you've added the permissions to your AndroidManifest.xml
 ```
 
 Add the following line to your pubspec.yaml  
-``` flutter_file_downloader: ^1.2.0-dev.4```
+``` flutter_file_downloader: ^1.2.0```
 
 Next,  
     add the library import to your dart file,  
@@ -137,6 +137,20 @@ final List<File?> files = await FileDownloader.downloadFilesWithCustomHeaders(re
     DownloadFileRequest(downloadUrls[2], headers: {'Authorization': 'Basic token3'}),
     DownloadFileRequest(downloadUrls[3], headers: {'Authorization': 'Basic token4'}),
 ])
+```
+**Also you can cancel a processing download**
+```
+//by first getting the download id as follows:
+FileDownloader.downloadFile(
+    url: url.text.trim(),
+    onDownloadRequestIdReceived: (id) {
+        setState(() => _downloadId = id);
+    },
+);
+
+//and then call the cancelDownload function which returns a bool
+final canceled = await FileDownloader.cancelDownload(_downloadId!);
+print('Canceled: $canceled');
 ```
 <br></br>
 
