@@ -203,7 +203,7 @@ public class DownloadTask {
 //            extension = realExtension;
 //        }
 
-        return String.format("%s.%s", name, extension.replace(".", ""));
+        return name + (extension == null ? "" : "."+extension);
     }
 
     private String getExtensionFrom(final String name) {
