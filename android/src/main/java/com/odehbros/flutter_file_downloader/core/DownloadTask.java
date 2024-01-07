@@ -123,7 +123,7 @@ public class DownloadTask {
                 int bytesDownloaded;
                 int bytesTotal;
                 int status;
-                 String downloadName;
+                String downloadName;
                 try {
                     bytesDownloaded = cursor.getInt(downloadedCursorColumnIndex);
                     bytesTotal = cursor.getInt(totalCursorColumnIndex);
@@ -203,7 +203,10 @@ public class DownloadTask {
 //            extension = realExtension;
 //        }
 
-        return String.format("%s.%s", name, extension.replace(".", ""));
+//        return name;
+        if (extension == null)
+            return name;
+        return String.format("%s.%s", name, extension);
     }
 
     private String getExtensionFrom(final String name) {
