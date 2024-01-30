@@ -155,10 +155,13 @@ public class DownloadTask {
                 final double progress = (int) ((bytesDownloaded * 100L) / bytesTotal);
                 if (lastProgress != progress) {
                     if (callbacks != null) {
-                        uiThreadHandler.post(() -> {
-                            callbacks.onProgress(progress);
-                            callbacks.onProgress(downloadName, progress);
-                        });
+                        if (downloadName != null && !downloadName.isEmpty()) {
+                            uiThreadHandler.post(() -> {
+                                //removed to avoid redundant calls to onProgress
+//                            callbacks.onProgress(progress);
+                                callbacks.onProgress(downloadName, progress);
+                            });
+                        }
                     }
                     lastProgress = progress;
                 }
