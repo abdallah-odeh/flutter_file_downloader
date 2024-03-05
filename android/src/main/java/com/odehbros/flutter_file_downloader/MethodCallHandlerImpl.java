@@ -243,7 +243,8 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     }
                 })
                 .build()
-                .startDownloading(context);
+//                .startDownloading(context);
+                .startDownload(context);
     }
 
     private void removeTask(final long id) {
