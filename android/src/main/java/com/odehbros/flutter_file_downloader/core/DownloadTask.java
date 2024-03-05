@@ -16,6 +16,8 @@ import java.util.Map;
 
 import io.flutter.util.PathUtils;
 
+import java.io.BufferedInputStream;
+
 import com.odehbros.flutter_file_downloader.StoreHelper;
 
 public class DownloadTask {
@@ -36,6 +38,33 @@ public class DownloadTask {
         this.callbacks = callbacks;
         this.requestHeaders = requestHeaders;
         this.helper = helper;
+    }
+
+    public void startDownload(final Context context) {
+        final String FILE_URL = url;
+        final String FILE_NAME = getFileName();
+
+        try {
+            BufferedInputStream in = new BufferedInputStream(new URL(FILE_URL).openStream());
+            FileOutputStream fileOutputStream = new FileOutputStream(FILE_NAME);
+            byte dataBuffer[] = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                fileOutputStream.write(dataBuffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            // handle exception
+        }
+
+
+    }
+
+    private String getFileName() {
+        final Uri uri = Uri.parse(url);
+        final List<String> path = uri.getPathSegments();
+        final String originalName = path.get(path.size() - 1);
+
+        return getDownloadFileName(name, originalName);
     }
 
     public void startDownloading(final Context context) {
