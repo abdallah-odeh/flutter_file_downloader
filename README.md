@@ -16,6 +16,12 @@ Note: This plugin is not built for iOS, it will not effect it at all.
 - Ability to determine where to download (public downloads/app directory)
 - Ability to track download progress
 
+<br>
+
+If you would like to support me, buy me a coffee 🙃<br>
+<b>HALF OF THE DONATIONS WILL GO TO GAZA, Free Palestine 🇵🇸</b><br>
+<a href="https://www.buymeacoffee.com/abdallahodeh" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60" width="217"></a>
+
 ## Getting Started
 
 First, make sure that you've added the permissions to your AndroidManifest.xml
