@@ -4,6 +4,10 @@
 ### Fixed
 - Fixed duplicate call for onProgress
 
+## [1.2.2-dev.1] - 08-04-2024
+### Fixed
+- Fixed binding a broadcast in new android 14 issue
+
 ## [1.2.1] - 07-01-2024
 ### Fixed
 - Fixed crash exception when file URL does not contain file extension

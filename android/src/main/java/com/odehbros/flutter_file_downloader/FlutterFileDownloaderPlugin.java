@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
@@ -31,9 +32,12 @@ public class FlutterFileDownloaderPlugin implements FlutterPlugin, ActivityAware
     private static final String TAG = "FlutterFileDownloader";
     private final PermissionManager permissionManager;
 
-    @Nullable private MethodCallHandlerImpl methodCallHandler;
-    @Nullable private ActivityPluginBinding pluginBinding;
-    @Nullable private DownloadCompleterBroadcast onDownloadCompleted;
+    @Nullable
+    private MethodCallHandlerImpl methodCallHandler;
+    @Nullable
+    private ActivityPluginBinding pluginBinding;
+    @Nullable
+    private DownloadCompleterBroadcast onDownloadCompleted;
 
     public FlutterFileDownloaderPlugin() {
         permissionManager = new PermissionManager();
@@ -98,7 +102,12 @@ public class FlutterFileDownloaderPlugin implements FlutterPlugin, ActivityAware
     }
 
     private void bindForegroundService(Context context) {
-        context.registerReceiver(onDownloadCompleted, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        final IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        if (Build.VERSION.SDK_INT >= 34 && context.getApplicationInfo().targetSdkVersion >= 34) {
+            context.registerReceiver(onDownloadCompleted, filter, Context.RECEIVER_EXPORTED);
+        } else {
+            context.registerReceiver(onDownloadCompleted, filter);
+        }
     }
 
     private void unbindForegroundService(Context context) {
