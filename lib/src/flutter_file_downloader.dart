@@ -8,6 +8,8 @@ import 'package:flutter_file_downloader/src/download_file_request.dart';
 import 'download_callbacks.dart';
 
 part 'download_destinations.dart';
+part 'download_request_method_type.dart';
+part 'download_service.dart';
 part 'download_task.dart';
 part 'notification_types.dart';
 
@@ -275,18 +277,22 @@ class FileDownloader {
     _queueTask(task);
     _downloadTasks[task.key] = task;
     try {
-      final result = await _platform.invokeMethod('downloadFile', {
-        'url': url.trim(),
-        'key': task.key.toString(),
-        'notifications': task.notificationType.name,
-        'download_destination': task.downloadDestination.name,
-        if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
-        'headers': headers,
-        'onidreceived': onDownloadRequestIdReceived?.toString(),
-        'onprogress_named': onProgress?.toString(),
-        'ondownloadcompleted': onDownloadCompleted?.toString(),
-        'ondownloaderror': onDownloadError?.toString(),
-      });
+      final result = await _platform.invokeMethod(
+        'downloadFile',
+        {
+          'url': url.trim(),
+          'key': task.key.toString(),
+          'notifications': task.notificationType.name,
+          'download_destination': task.downloadDestination.name,
+          if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
+          'headers': headers,
+          'onidreceived': onDownloadRequestIdReceived?.toString(),
+          'onprogress_named': onProgress?.toString(),
+          'ondownloadcompleted': onDownloadCompleted?.toString(),
+          'ondownloaderror': onDownloadError?.toString(),
+          ...task.toMap(),
+        },
+      );
       if (result is String && result.isNotEmpty) {
         return File(result);
       }

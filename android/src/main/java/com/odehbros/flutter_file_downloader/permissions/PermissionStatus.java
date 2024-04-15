@@ -1,6 +1,6 @@
-package com.odehbros.flutter_file_downloader.permission;
+package com.odehbros.flutter_file_downloader.permissions;
 
-public enum StoragePermission {
+public enum PermissionStatus {
     /// Permission to access the storage is denied by the user.
     denied,
     /// Permission to access the storage is denied for ever. The

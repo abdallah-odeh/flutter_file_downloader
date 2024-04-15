@@ -9,6 +9,10 @@ enum NotificationType {
   ///when the download is completed user will not get notified
   progressOnly,
 
+  ///this type will only notify the user about the download result
+  ///user will only be notified when download is completed, either succeed or failed
+  completionOnly,
+
   ///this will completely suppress notifications,
   ///this type require a permission added in your manifest
   ///<uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
