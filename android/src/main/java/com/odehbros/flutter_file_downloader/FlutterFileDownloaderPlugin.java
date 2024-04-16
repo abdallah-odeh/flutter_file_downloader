@@ -39,6 +39,7 @@ public class FlutterFileDownloaderPlugin implements FlutterPlugin, ActivityAware
 
 
     public FlutterFileDownloaderPlugin() {
+        permissionManager = new PermissionHandler();
     }
 
     @Override
@@ -62,7 +63,7 @@ public class FlutterFileDownloaderPlugin implements FlutterPlugin, ActivityAware
         this.pluginBinding = binding;
         registerListeners();
         if (methodCallHandler != null) {
-            permissionManager = new PermissionHandler(binding.getActivity());
+            permissionManager.setActivity(binding.getActivity());
             methodCallHandler.setActivity(binding.getActivity());
         }
     }

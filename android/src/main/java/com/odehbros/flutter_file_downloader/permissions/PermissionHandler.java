@@ -22,7 +22,7 @@ import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
 
 public class PermissionHandler implements RequestPermissionsResultListener {
 
-    private final Activity activity;
+    private  Activity activity;
 
     private PermissionResultCallback resultCallback;
     private ErrorCallback errorCallback;
@@ -31,7 +31,9 @@ public class PermissionHandler implements RequestPermissionsResultListener {
     static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     static final String POST_NOTIFICATIONS = Manifest.permission.POST_NOTIFICATIONS;
 
-    public PermissionHandler(Activity activity) {
+    public PermissionHandler(){}
+
+    public void setActivity(final Activity activity) {
         this.activity = activity;
     }
 
