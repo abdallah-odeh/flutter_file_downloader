@@ -1,3 +1,8 @@
+## 2.0.0
+
+- Full refactor of the plugin
+- Added the ability to create sub directories in Downloads/ or AppData/ to download your files into
+
 ## 1.2.2
 
 - Fixed duplicate call for onProgress [#44](https://github.com/abdallah-odeh/flutter_file_downloader/issues/44)
