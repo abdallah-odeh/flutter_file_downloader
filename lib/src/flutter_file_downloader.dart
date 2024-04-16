@@ -267,8 +267,14 @@ class FileDownloader {
       return Future.value(null);
     }
     if (!(Uri.tryParse(url)?.hasAbsolutePath ?? false)) {
-      throw Exception(
-          'URL is not valid, "$url" is not a valid url, please double check it then try again');
+      final error =
+          'URL is not valid, "$url" is not a valid url, please double check it then try again';
+      if (onDownloadError != null) {
+        onDownloadError.call(error);
+        return null;
+      } else {
+        throw Exception(error);
+      }
     }
     final task = _DownloadTask(
       url: url.trim(),
