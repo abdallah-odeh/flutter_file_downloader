@@ -75,9 +75,12 @@ class FileDownloader {
   static Future<File?> downloadFile({
     required final String url,
     final String? name,
+    final String? subPath,
     final NotificationType notificationType = NotificationType.progressOnly,
     final DownloadDestinations downloadDestination =
         DownloadDestinations.publicDownloads,
+    final DownloadService downloadService = DownloadService.downloadManager,
+    final DownloadRequestMethodType methodType = DownloadRequestMethodType.get,
     final Map<String, String> headers = const {},
     final OnDownloadRequestIdReceived? onDownloadRequestIdReceived,
     final OnProgress? onProgress,
@@ -88,8 +91,11 @@ class FileDownloader {
         ._downloadFile(
           url: url,
           name: name,
+          subPath: subPath,
           notificationType: notificationType,
           downloadDestination: downloadDestination,
+          downloadService: downloadService,
+          methodType: methodType,
           headers: headers,
           onDownloadRequestIdReceived: onDownloadRequestIdReceived,
           onProgress: onProgress,
@@ -244,8 +250,11 @@ class FileDownloader {
   Future<File?> _downloadFile({
     required final String url,
     final String? name,
+    final String? subPath,
     required final NotificationType notificationType,
     required final DownloadDestinations downloadDestination,
+    final DownloadService downloadService = DownloadService.downloadManager,
+    final DownloadRequestMethodType methodType = DownloadRequestMethodType.get,
     final Map<String, String> headers = const {},
     final OnDownloadRequestIdReceived? onDownloadRequestIdReceived,
     final OnProgress? onProgress,
@@ -264,8 +273,12 @@ class FileDownloader {
     final task = _DownloadTask(
       url: url.trim(),
       name: name?.trim(),
+      subPath: subPath,
       notificationType: notificationType,
       downloadDestination: downloadDestination,
+      downloadService: downloadService,
+      methodType: methodType,
+      headers: headers,
       callbacks: DownloadCallbacks(
         onDownloadRequestIdReceived: onDownloadRequestIdReceived,
         onProgress: onProgress,
@@ -279,19 +292,20 @@ class FileDownloader {
     try {
       final result = await _platform.invokeMethod(
         'downloadFile',
-        {
-          'url': url.trim(),
-          'key': task.key.toString(),
-          'notifications': task.notificationType.name,
-          'download_destination': task.downloadDestination.name,
-          if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
-          'headers': headers,
-          'onidreceived': onDownloadRequestIdReceived?.toString(),
-          'onprogress_named': onProgress?.toString(),
-          'ondownloadcompleted': onDownloadCompleted?.toString(),
-          'ondownloaderror': onDownloadError?.toString(),
-          ...task.toMap(),
-        },
+        task.toMap() ??
+            {
+              'url': url.trim(),
+              'key': task.key.toString(),
+              'notifications': task.notificationType.name,
+              'download_destination': task.downloadDestination.name,
+              if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
+              'headers': headers,
+              'onidreceived': onDownloadRequestIdReceived?.toString(),
+              'onprogress_named': onProgress?.toString(),
+              'ondownloadcompleted': onDownloadCompleted?.toString(),
+              'ondownloaderror': onDownloadError?.toString(),
+              ...task.toMap(),
+            },
       );
       if (result is String && result.isNotEmpty) {
         return File(result);

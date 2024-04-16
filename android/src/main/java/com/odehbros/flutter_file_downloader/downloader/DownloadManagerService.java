@@ -10,14 +10,15 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.odehbros.flutter_file_downloader.PluginLogger;
 import com.odehbros.flutter_file_downloader.StoreHelper;
 import com.odehbros.flutter_file_downloader.core.DownloadCallbacks;
 import com.odehbros.flutter_file_downloader.core.DownloadNotificationType;
 import com.odehbros.flutter_file_downloader.downloadDestination.AppData;
 import com.odehbros.flutter_file_downloader.downloadDestination.DownloadDestination;
 import com.odehbros.flutter_file_downloader.downloadDestination.PublicDownloads;
+import com.odehbros.flutter_file_downloader.fileStore.FileUtils;
 
-import java.io.File;
 import java.util.Map;
 
 public class DownloadManagerService extends DownloadService {
@@ -97,10 +98,12 @@ public class DownloadManagerService extends DownloadService {
 
     private void setDownloadPath() {
         final String dir = downloadDestination.getDirectoryPath().getPath();
-        final String fileName = String.format("file_downloader/%s", getFileName());
+        final String subPath = FileUtils.fixSubPath(downloadDestination.subPath);
+        final String fileName = String.format("%s%s", subPath, getFileName());
+        final String dirPath = String.format("%s/%s", dir, subPath);
         final String fullPath = String.format("%s/%s", dir, fileName);
-        final boolean dirsCreated = new File(fullPath).mkdirs();
-        System.out.println("Full path: " +fullPath + ", has created dirs? "+dirsCreated);
+        final boolean dirsCreated = FileUtils.createDir(dirPath);
+        PluginLogger.log("Dir path: " + dirPath + ", has created dirs? " + dirsCreated);
         if (downloadDestination instanceof AppData) {
             downloadManager.setDestinationInExternalFilesDir(
                     activity,

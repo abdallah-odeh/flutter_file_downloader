@@ -14,6 +14,7 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
   String _status = '';
   final SessionSettings settings = SessionSettings();
   final TextEditingController name = TextEditingController();
+  final TextEditingController subPath = TextEditingController();
   final TextEditingController url = TextEditingController(
     text: 'https://research.nhm.org/pdfs/10840/10840-002.pdf',
     // 'http://www.africau.edu/images/default/sample.pdf',
@@ -42,11 +43,18 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
             ],
             TextField(
               controller: url,
-              decoration: const InputDecoration(label: Text('Url*')),
+              decoration: const InputDecoration(labelText: 'Url*'),
             ),
             TextField(
               controller: name,
-              decoration: const InputDecoration(label: Text('File name')),
+              decoration: const InputDecoration(labelText: 'File name'),
+            ),
+            TextField(
+              controller: subPath,
+              decoration: const InputDecoration(
+                labelText: 'Sub directories',
+                hintText: 'mFiles/dir1/',
+              ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -58,6 +66,7 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
                           url: url.text.trim(),
                           name: name.text.trim(),
                           headers: {'Header': 'Test'},
+                          subPath: subPath.text.trim(),
                           downloadDestination: settings.downloadDestination,
                           notificationType: settings.notificationType,
                           onDownloadRequestIdReceived: (id) {

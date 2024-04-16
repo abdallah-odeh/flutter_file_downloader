@@ -77,10 +77,10 @@ public class DownloadTask {
     public DownloadTask setDownloadDestination(String downloadDestination) {
         switch (downloadDestination.toLowerCase()) {
             case "publicdownloads":
-                this.downloadDestination = new PublicDownloads();
+                this.downloadDestination = new PublicDownloads(subPath);
                 break;
             case "appfiles":
-                this.downloadDestination = new AppData();
+                this.downloadDestination = new AppData(subPath);
                 break;
             default:
                 PluginLogger.log("No destination with name " + downloadDestination);

@@ -46,6 +46,7 @@ Last step,
 FileDownloader.downloadFile(
     url: "YOUR DOWNLOAD URL",
     name: "THE FILE NAME AFTER DOWNLOADING",//(optional) 
+    subPath: "your/desired/sub/path",//(optional) 
     onProgress: (String fileName, double progress) {
       print('FILE fileName HAS PROGRESS $progress');
     },
