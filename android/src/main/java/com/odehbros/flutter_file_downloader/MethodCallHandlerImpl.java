@@ -204,6 +204,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     @Override
                     public void onDownloadCompleted(String path) {
                         super.onDownloadCompleted(path);
+                        PluginLogger.log("Download "+id+" has completed, path: "+path);
 
                         Map<String, Object> args = new HashMap();
 
@@ -229,6 +230,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                         removeTask(id);
                     }
                 })
+                .setMethodCallHandler(this)
                 .build()
                 .startDownload();
     }

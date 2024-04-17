@@ -55,12 +55,14 @@ public class DownloadCompleterBroadcast extends BroadcastReceiver {
                             int message = cursor.getInt(columnIndex);
 
                             final DownloadCallbacks task = methodCallHandler.getTask(id);
-                            if (task != null)
+                            if (task != null) {
                                 task.onDownloadError(message + "");
+                            }
 
                             final StoreHelper helper = methodCallHandler.findHelper(id);
-                            if (helper != null)
+                            if (helper != null) {
                                 helper.result.error("Download file error", message + "", null);
+                            }
                         }
                     }
                 }

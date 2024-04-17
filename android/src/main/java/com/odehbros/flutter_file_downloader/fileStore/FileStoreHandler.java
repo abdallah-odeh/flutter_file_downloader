@@ -1,5 +1,8 @@
 package com.odehbros.flutter_file_downloader.fileStore;
 
+import android.text.TextUtils;
+
+import com.odehbros.flutter_file_downloader.PluginLogger;
 import com.odehbros.flutter_file_downloader.core.DownloadCallbacks;
 
 import java.io.BufferedOutputStream;
@@ -61,11 +64,26 @@ public class FileStoreHandler {
         return file;
     }
 
+    public String createFile(String directory, String subPath, String name) throws IOException {
+        if (TextUtils.isEmpty(subPath)) {
+            return createFile(
+                    directory,
+                    name);
+        }
+        subPath = FileUtils.fixSubPath(subPath);
+        return createFile(
+                String.format("%s/%s", directory, subPath),
+                name);
+    }
+
     public String createFile(final String directory, final String name) throws IOException {
         String path = String.format("%s/%s", directory, name);
         final String[] splitted = name.split("\\.");
         final String extension = splitted[splitted.length - 1];
-        if (!new File(path).mkdirs()) return null;
+        if (!FileUtils.createDir(directory)) {
+            PluginLogger.log("Create directories " + directory + " failed!");
+            return null;
+        }
         int instanceNo = 0;
         do {
             File file = new File(path);

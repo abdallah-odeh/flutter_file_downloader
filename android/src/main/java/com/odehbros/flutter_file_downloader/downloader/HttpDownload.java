@@ -3,7 +3,9 @@ package com.odehbros.flutter_file_downloader.downloader;
 import android.app.Activity;
 import android.os.StrictMode;
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.odehbros.flutter_file_downloader.MethodCallHandlerImpl;
 import com.odehbros.flutter_file_downloader.PluginLogger;
 import com.odehbros.flutter_file_downloader.StoreHelper;
 import com.odehbros.flutter_file_downloader.core.DownloadCallbacks;
@@ -27,9 +29,11 @@ public class HttpDownload extends DownloadService {
     private HttpURLConnection urlConnection;
     final DownloadNotification notification;
     final NotificationTexts notificationTexts;
+    final MethodCallHandlerImpl methodCallHandler;
 
-    public HttpDownload(Activity activity, String url, String name, DownloadNotificationType notifications, DownloadDestination downloadDestination, DownloadCallbacks callbacks, Map<String, String> requestHeaders, StoreHelper helper) {
+    public HttpDownload(Activity activity, String url, String name, DownloadNotificationType notifications, DownloadDestination downloadDestination, DownloadCallbacks callbacks, Map<String, String> requestHeaders, StoreHelper helper, MethodCallHandlerImpl methodCallHandler) {
         super(activity, url, name, notifications, downloadDestination, callbacks, requestHeaders, helper);
+        this.methodCallHandler = methodCallHandler;
         notificationTexts = NotificationTexts.defaultText();
 
         notification = new DownloadNotification(activity, getFileName(), notificationTexts);
@@ -37,8 +41,9 @@ public class HttpDownload extends DownloadService {
         initialize(url);
     }
 
-    public HttpDownload(Activity activity, String url, String name, DownloadNotificationType notifications, DownloadDestination downloadDestination, DownloadCallbacks callbacks, Map<String, String> requestHeaders, StoreHelper helper, NotificationTexts notificationTexts) {
+    public HttpDownload(Activity activity, String url, String name, DownloadNotificationType notifications, DownloadDestination downloadDestination, DownloadCallbacks callbacks, Map<String, String> requestHeaders, StoreHelper helper, MethodCallHandlerImpl methodCallHandler, NotificationTexts notificationTexts) {
         super(activity, url, name, notifications, downloadDestination, callbacks, requestHeaders, helper);
+        this.methodCallHandler = methodCallHandler;
         if (notificationTexts == null) {
             notificationTexts = NotificationTexts.defaultText();
         }
@@ -163,6 +168,7 @@ public class HttpDownload extends DownloadService {
                     File tmpFile = new File(fileName + ".tmp");
                     final String filePath = fileStoreHandler.createFile(
                             downloadDestination.getDirectoryPath().getAbsolutePath(),
+                            downloadDestination.subPath,
                             fileName);
                     updateNotificationFileNameFromPath(filePath);
                     PluginLogger.log("TMP FILE PATH: " + filePath);
@@ -181,12 +187,18 @@ public class HttpDownload extends DownloadService {
                         activity.runOnUiThread(() -> callbacks.onProgress(finalFileName, finalProgress * 100));
                         notification.populateProgress(progress * 100);
                     }
-                    callbacks.onDownloadCompleted(filePath);
+                    activity.runOnUiThread(() -> callbacks.onDownloadCompleted(filePath));
+                    if (task != null) {
+                        task.result.success(filePath);
+                    }
                     notification.populateDownloadResult(true);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
-                    activity.runOnUiThread(() -> callbacks.onDownloadError(e.getLocalizedMessage()));
-                    callbacks.onDownloadError(e.getLocalizedMessage());
+                    final String message = e.getLocalizedMessage();
+                    activity.runOnUiThread(() -> callbacks.onDownloadError(message));
+                    if (task != null) {
+                        task.result.error("Download file error", message + "", null);
+                    }
                     notification.populateDownloadResult(false);
                 }
             }

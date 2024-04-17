@@ -63,12 +63,14 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
                 ElevatedButton(
                     onPressed: () async {
                       FileDownloader.downloadFile(
-                          url: url.text.trim(),
+                          url: 'https://odeh-bros.com/dummy-link/file.pdf',
+                          // url: url.text.trim(),
                           name: name.text.trim(),
                           headers: {'Header': 'Test'},
                           subPath: subPath.text.trim(),
                           downloadDestination: settings.downloadDestination,
                           notificationType: settings.notificationType,
+                          downloadService: DownloadService.httpConnection,
                           onDownloadRequestIdReceived: (id) {
                             setState(() => _downloadId = id);
                           },
@@ -79,6 +81,7 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
                             });
                           },
                           onDownloadCompleted: (path) {
+                            print('DOWNLOAD COMPLETED $path');
                             setState(() {
                               _downloadId = null;
                               _progress = null;
@@ -86,6 +89,7 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
                             });
                           },
                           onDownloadError: (error) {
+                            print('DOWNLOAD FAILED $error');
                             setState(() {
                               _progress = null;
                               _status = 'Download error: $error';

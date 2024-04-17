@@ -3,6 +3,7 @@ package com.odehbros.flutter_file_downloader.core;
 import android.app.Activity;
 import android.text.TextUtils;
 
+import com.odehbros.flutter_file_downloader.MethodCallHandlerImpl;
 import com.odehbros.flutter_file_downloader.PluginLogger;
 import com.odehbros.flutter_file_downloader.StoreHelper;
 import com.odehbros.flutter_file_downloader.downloadDestination.AppData;
@@ -30,6 +31,7 @@ public class DownloadTask {
     StoreHelper helper;
     NotificationTexts notificationTexts;
     DownloadTaskService service;
+    MethodCallHandlerImpl methodCallHandler;
 
     public DownloadTask(Activity activity) {
         this.activity = activity;
@@ -80,7 +82,7 @@ public class DownloadTask {
                 this.downloadDestination = new PublicDownloads(subPath);
                 break;
             case "appfiles":
-                this.downloadDestination = new AppData(subPath);
+                this.downloadDestination = new AppData(activity, subPath);
                 break;
             default:
                 PluginLogger.log("No destination with name " + downloadDestination);
@@ -118,6 +120,11 @@ public class DownloadTask {
         return this;
     }
 
+    public DownloadTask setMethodCallHandler(MethodCallHandlerImpl methodCallHandler) {
+        this.methodCallHandler = methodCallHandler;
+        return this;
+    }
+
     public DownloadTask setNotificationTexts(NotificationTexts notificationTexts) {
         this.notificationTexts = notificationTexts;
         return this;
@@ -127,18 +134,22 @@ public class DownloadTask {
         switch (service.toLowerCase()) {
             case "downloadmanager":
                 if (methodType != DownloadRequestMethodType.GET) {
-                    this.service = DownloadTaskService.HTTP_CONNECTION;
+                    setService(DownloadTaskService.HTTP_CONNECTION);
                 } else {
                     // since DownloadManager does only support GET request,
                     // we force setting it to DownloadManager
-                    this.service = DownloadTaskService.DOWNLOAD_MANAGER;
+                    setService(DownloadTaskService.DOWNLOAD_MANAGER);
                 }
                 break;
             case "httpconnection":
-                this.service = DownloadTaskService.HTTP_CONNECTION;
+                setService(DownloadTaskService.HTTP_CONNECTION);
                 break;
         }
         return this;
+    }
+
+    private void setService(final DownloadTaskService service) {
+        this.service = service;
     }
 
     public DownloadService build() {
@@ -154,6 +165,7 @@ public class DownloadTask {
                         callbacks,
                         requestHeaders,
                         helper,
+                        methodCallHandler,
                         notificationTexts);
             case DOWNLOAD_MANAGER:
                 return new DownloadManagerService(
