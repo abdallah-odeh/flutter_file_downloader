@@ -124,7 +124,7 @@ void main() async {
 
             tester.printToConsole('Download started!');
             await FileDownloader.downloadFile(
-              url: 'https://thisIsASampleUrl.shouldFailed/fileName.ext',
+              url: 'https://odeh-bros.com/dummy-link/file.pdf',
               onDownloadError: (error) {
                 callbackTriggered = true;
               },

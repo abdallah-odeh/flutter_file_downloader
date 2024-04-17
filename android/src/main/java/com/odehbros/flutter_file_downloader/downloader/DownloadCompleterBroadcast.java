@@ -24,6 +24,7 @@ public class DownloadCompleterBroadcast extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         if (action == null) return;
+        System.out.println("ACTION IN COMPLETION BROAD CAST IS "+action);
         if (!action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) return;
 
         try {
