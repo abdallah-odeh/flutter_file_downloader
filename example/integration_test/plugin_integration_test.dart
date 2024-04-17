@@ -24,9 +24,9 @@ void main() async {
       downloadPath = 'https://research.nhm.org/pdfs/10840/10840-002.pdf';
     });
 
-    group('Download Manager', () {
+    group('Download Manager service', () {
       testWidgets(
-        'Valid url must be downloaded without any issues',
+        'File must be downloaded in Downloads/',
         (tester) async {
           await tester.pumpWidget(const MyApp());
 
@@ -40,7 +40,95 @@ void main() async {
           expect(
             await file!.exists(),
             true,
-            reason: 'File must be downloaded and exists in it\'s path',
+            reason: 'File must be downloaded and exists under Downloads/',
+          );
+        },
+      );
+      testWidgets(
+        'File must be downloaded in AppData/',
+        (tester) async {
+          await tester.pumpWidget(const MyApp());
+
+          final file = await FileDownloader.downloadFile(
+            url: downloadPath,
+            downloadDestination: DownloadDestinations.appFiles,
+          );
+          expect(
+            file != null,
+            true,
+            reason: 'Simple download must never failed',
+          );
+
+          expect(
+            await file!.exists(),
+            true,
+            reason: 'File must be downloaded and exists under AppData/',
+          );
+        },
+      );
+
+      testWidgets(
+        'SubPath feature test',
+        (tester) async {
+          await tester.pumpWidget(const MyApp());
+
+          const String subPath = 'flutter_file_downloader/integration-test/';
+
+          final file = await FileDownloader.downloadFile(
+            url: downloadPath,
+            subPath: subPath,
+          );
+          expect(
+            file != null,
+            true,
+            reason: 'Simple download must never failed',
+          );
+
+          expect(
+            file!.path.contains(subPath),
+            true,
+            reason: 'File path must contain the subPath $subPath',
+          );
+
+          expect(
+            await file.exists(),
+            true,
+            reason:
+                'File must be downloaded and exists under Downloads/$subPath',
+          );
+        },
+      );
+      testWidgets(
+        'File must be renamed after download',
+        (tester) async {
+          await tester.pumpWidget(const MyApp());
+
+          final String randomName =
+              'test-file-${DateTime.now().millisecondsSinceEpoch}';
+
+          final file = await FileDownloader.downloadFile(
+            url: downloadPath,
+            name: randomName,
+          );
+
+          expect(
+            file != null,
+            true,
+            reason: 'Simple download must never failed',
+          );
+
+          final realFileName = file!.path.split('/').last;
+
+          expect(
+            realFileName.startsWith(randomName),
+            true,
+            reason: 'Filename must be $randomName but it\'s $realFileName',
+          );
+
+          expect(
+            await file.exists(),
+            true,
+            reason: 'File must be downloaded and exists under Downloads/',
           );
         },
       );
