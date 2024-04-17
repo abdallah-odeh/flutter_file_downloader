@@ -36,6 +36,7 @@ public class DownloadManagerService extends DownloadService {
 
     @Override
     protected void download() {
+        isDownloading = true;
         //declare download manager instance with above configuration
         final DownloadManager manager = (DownloadManager) activity.getSystemService(Context.DOWNLOAD_SERVICE);
         try {
