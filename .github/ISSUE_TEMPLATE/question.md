@@ -5,7 +5,7 @@ labels: question
 
 ---
 
-<!-- Thank your for your input! Before you submit your issue, please make sure you've searched https://github.com/abdallah-odeh/flutter_file_downloader/issues for existing questions. -->
+<!-- Thank your for your input! Before you submit your issue, please make sure you've searched https://github.com/abdallah-odeh/flutter_file_downloader/issues?q=label%3A%22question%22 for existing questions. -->
 
 ## Configuration
 - Version: 0.X.Y
