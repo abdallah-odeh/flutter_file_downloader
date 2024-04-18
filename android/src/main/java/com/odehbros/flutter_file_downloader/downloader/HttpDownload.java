@@ -196,11 +196,13 @@ public class HttpDownload extends DownloadService {
                     notification.populateDownloadResult(true);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    final String message = e.getLocalizedMessage();
+                     String message = e.getLocalizedMessage();
+                     if (TextUtils.isEmpty(message)) message = e.toString();
+                    String finalMessage = message;
                     activity.runOnUiThread(() -> {
-                        callbacks.onDownloadError(message);
+                        callbacks.onDownloadError(finalMessage);
                         if (task != null) {
-                            task.result.error("Download file error", message + "", null);
+                            task.result.error("Download file error", finalMessage, null);
                         }
                     });
                     notification.populateDownloadResult(false);
