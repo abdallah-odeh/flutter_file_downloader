@@ -263,7 +263,7 @@ void main() async {
           },
         );
       },
-      skip: true,
+      // skip: true,
     );
     group('HTTPConnection service', () {
       late DownloadService downloadService;
@@ -417,13 +417,16 @@ void main() async {
 
             var callbackTriggered = false;
 
-            await FileDownloader.downloadFile(
+            final file = await FileDownloader.downloadFile(
               url: downloadPath,
               downloadService: downloadService,
               onDownloadCompleted: (path) {
+                tester.printToConsole('Download has completed, yaay!!, $path');
                 callbackTriggered = true;
               },
             );
+
+            tester.printToConsole('Download is over, ${file?.path}');
 
             expect(
               callbackTriggered,

@@ -187,18 +187,22 @@ public class HttpDownload extends DownloadService {
                         activity.runOnUiThread(() -> callbacks.onProgress(finalFileName, finalProgress * 100));
                         notification.populateProgress(progress * 100);
                     }
-                    activity.runOnUiThread(() -> callbacks.onDownloadCompleted(filePath));
-                    if (task != null) {
-                        task.result.success(filePath);
-                    }
+                    activity.runOnUiThread(() -> {
+                        callbacks.onDownloadCompleted(filePath);
+                        if (task != null) {
+                            task.result.success(filePath);
+                        }
+                    });
                     notification.populateDownloadResult(true);
                 } catch (Exception e) {
                     e.printStackTrace();
                     final String message = e.getLocalizedMessage();
-                    activity.runOnUiThread(() -> callbacks.onDownloadError(message));
-                    if (task != null) {
-                        task.result.error("Download file error", message + "", null);
-                    }
+                    activity.runOnUiThread(() -> {
+                        callbacks.onDownloadError(message);
+                        if (task != null) {
+                            task.result.error("Download file error", message + "", null);
+                        }
+                    });
                     notification.populateDownloadResult(false);
                 }
             }
