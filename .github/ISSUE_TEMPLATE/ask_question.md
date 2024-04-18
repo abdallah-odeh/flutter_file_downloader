@@ -1,5 +1,5 @@
 ---
-name: ✨ Ask a Question
+name: 🤔 Ask a Question
 about: Ask the community for help
 labels: question
 
