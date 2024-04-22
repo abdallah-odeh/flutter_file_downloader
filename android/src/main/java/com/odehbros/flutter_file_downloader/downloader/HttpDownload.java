@@ -3,7 +3,6 @@ package com.odehbros.flutter_file_downloader.downloader;
 import android.app.Activity;
 import android.os.StrictMode;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.odehbros.flutter_file_downloader.MethodCallHandlerImpl;
 import com.odehbros.flutter_file_downloader.PluginLogger;
@@ -18,10 +17,11 @@ import com.odehbros.flutter_file_downloader.notificationService.NotificationText
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
+import java.net.SocketException;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.Map;
 
 public class HttpDownload extends DownloadService {
@@ -170,6 +170,9 @@ public class HttpDownload extends DownloadService {
                             downloadDestination.getDirectoryPath().getAbsolutePath(),
                             downloadDestination.subPath,
                             fileName);
+                    activity.runOnUiThread(() -> {
+                        callbacks.onIDReceived(Calendar.getInstance().getTimeInMillis());
+                    });
                     updateNotificationFileNameFromPath(filePath);
                     PluginLogger.log("TMP FILE PATH: " + filePath);
                     FileOutputStream fileOutputStream = new FileOutputStream(filePath);
@@ -195,9 +198,11 @@ public class HttpDownload extends DownloadService {
                     });
                     notification.populateDownloadResult(true);
                 } catch (Exception e) {
-                    e.printStackTrace();
-                     String message = e.getLocalizedMessage();
-                     if (TextUtils.isEmpty(message)) message = e.toString();
+                    String message = e.getLocalizedMessage();
+                    if (TextUtils.isEmpty(message)) message = e.toString();
+                    if (e instanceof SocketException && "Socket closed".equals(message)) {
+                        message = "Download was canceled";
+                    }
                     String finalMessage = message;
                     activity.runOnUiThread(() -> {
                         callbacks.onDownloadError(finalMessage);

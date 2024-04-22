@@ -2,7 +2,6 @@ package com.odehbros.flutter_file_downloader;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.DownloadManager;
 import android.content.Context;
 import android.util.Log;
 
@@ -11,6 +10,7 @@ import androidx.annotation.Nullable;
 
 import com.odehbros.flutter_file_downloader.core.DownloadCallbacks;
 import com.odehbros.flutter_file_downloader.core.DownloadTask;
+import com.odehbros.flutter_file_downloader.downloader.DownloadService;
 import com.odehbros.flutter_file_downloader.errors.ErrorCodes;
 import com.odehbros.flutter_file_downloader.errors.PermissionUndefinedException;
 import com.odehbros.flutter_file_downloader.permissions.PermissionHandler;
@@ -151,7 +151,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         String notifications = helper.call.argument("notifications");
         Map<String, String> requestHeaders = helper.call.argument("headers");
 
-        new DownloadTask(activity)
+        final DownloadService downloadService = new DownloadTask(activity)
                 .setUrl(url)
                 .setName(name)
                 .setSubPath(subPath)
@@ -204,7 +204,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     @Override
                     public void onDownloadCompleted(String path) {
                         super.onDownloadCompleted(path);
-                        PluginLogger.log("Download "+id+" has completed, path: "+path);
+                        PluginLogger.log("Download " + id + " has completed, path: " + path);
 
                         Map<String, Object> args = new HashMap();
 
@@ -231,8 +231,10 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     }
                 })
                 .setMethodCallHandler(this)
-                .build()
-                .startDownload();
+                .build();
+
+        helper.setDownloadService(downloadService);
+        downloadService.startDownload();
     }
 
     private void removeTask(final long id) {
@@ -243,17 +245,23 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         final long id = Long.valueOf(helper.call.argument("id"));
 
         final DownloadCallbacks task = tasks.get(id);
-        if (task == null) {
+        final StoreHelper srcHelper = findHelper(id);
+        if (task == null && srcHelper == null) {
             helper.result.error(
                     "Download task not found",
                     "Could not find an active download task with id " + id,
                     null);
             return;
         }
-        task.onDownloadError("Download canceled");
-        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-        final int removedCount = downloadManager.remove(id);
-        helper.result.success(removedCount > 0);
+        final boolean isCanceled = srcHelper.getDownloadService().cancelDownload(id);
+        if (isCanceled) {
+            helper.result.success(true);
+        } else {
+            helper.result.error(
+                    "Cancel download failed",
+                    "Cancel download failed due to unknown error!",
+                    null);
+        }
     }
 
     public DownloadCallbacks getTask(final long id) {

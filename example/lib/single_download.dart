@@ -89,7 +89,6 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
                             });
                           },
                           onDownloadError: (error) {
-                            print('DOWNLOAD FAILED $error');
                             setState(() {
                               _progress = null;
                               _status = 'Download error: $error';
