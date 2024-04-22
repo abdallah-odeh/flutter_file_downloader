@@ -16,6 +16,7 @@ import com.odehbros.flutter_file_downloader.notificationService.NotificationText
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
@@ -198,16 +199,20 @@ public class HttpDownload extends DownloadService {
                     });
                     notification.populateDownloadResult(true);
                 } catch (Exception e) {
+//                    e.printStackTrace();
                     String message = e.getLocalizedMessage();
                     if (TextUtils.isEmpty(message)) message = e.toString();
                     if (e instanceof SocketException && "Socket closed".equals(message)) {
                         message = "Download was canceled";
+                    } else if (e instanceof FileNotFoundException && HttpDownload.super.url.equals(message)) {
+                        message = String.format("%s %s", message, "does not exist!");
+                        message = String.valueOf(404);
                     }
                     String finalMessage = message;
                     activity.runOnUiThread(() -> {
                         callbacks.onDownloadError(finalMessage);
                         if (task != null) {
-                            task.result.error("Download file error", finalMessage, null);
+                            task.result.error("Download file error", finalMessage, e.getStackTrace());
                         }
                     });
                     notification.populateDownloadResult(false);

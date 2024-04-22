@@ -64,13 +64,14 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
                     onPressed: () async {
                       FileDownloader.downloadFile(
                           // url: 'https://odeh-bros.com/dummy-link/file.pdf',
-                          url: url.text.trim(),
+                          // url: url.text.trim(),
+                          url: 'https://odeh-bros.com/dummy-link/file.pdf',
                           name: name.text.trim(),
                           headers: {'Header': 'Test'},
                           subPath: subPath.text.trim(),
                           downloadDestination: settings.downloadDestination,
                           notificationType: settings.notificationType,
-                          downloadService: DownloadService.httpConnection,
+                          // downloadService: DownloadService.httpConnection,
                           onDownloadRequestIdReceived: (id) {
                             setState(() => _downloadId = id);
                           },

@@ -421,7 +421,6 @@ void main() async {
               url: downloadPath,
               downloadService: downloadService,
               onDownloadCompleted: (path) {
-                tester.printToConsole('Download has completed, yaay!!, $path');
                 callbackTriggered = true;
               },
             );
@@ -499,8 +498,10 @@ void main() async {
             downloadService: downloadService,
             onDownloadRequestIdReceived: downloadIdCompleter.complete,
           ).then((value) {
-            fail(
-                'Download has completed without firing the downloadIdReceived callback');
+            if (!downloadIdCompleter.isCompleted) {
+              fail(
+                  'Download has completed without firing the downloadIdReceived callback');
+            }
           });
 
           final int downloadId = await downloadIdCompleter.future;
