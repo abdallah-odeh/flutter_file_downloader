@@ -18,6 +18,8 @@ Note: This plugin is not built for iOS, it will not effect it at all.
 
 - Ability to change file name once downloaded
 - Ability to create sub directories to download your file(s) in
+- Ability to download files over POST request
+- Ability to write base64 content into a local file
 - Ability to start a bulk download
 - Ability to pass headers with each download task
 - Ability to manage download notifications (all/progress only/off)

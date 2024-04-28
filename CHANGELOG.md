@@ -1,11 +1,9 @@
-## 2.0.0
+## 2.0.0-dev.1
 
 - Full refactor of the plugin
 - Added the ability to create sub directories in Downloads/ or AppData/ to download your files into
-
-## 1.2.2
-
-- Fixed duplicate call for onProgress [#44](https://github.com/abdallah-odeh/flutter_file_downloader/issues/44)
+- Added the ability to download files over POST request
+- Added the ability to write base64 into a local file 
 
 ## 1.2.2-dev.1
 
@@ -13,6 +11,7 @@
 
 ## 1.2.1
 
+- Fixed duplicate call for onProgress [#44](https://github.com/abdallah-odeh/flutter_file_downloader/issues/44)
 - Fixed crash exception when file URL does not contain file extension
 
 ## 1.2.0
