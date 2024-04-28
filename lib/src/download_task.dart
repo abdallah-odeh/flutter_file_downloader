@@ -1,10 +1,12 @@
 part of 'flutter_file_downloader.dart';
 
 ///The download task model to store some unique vars
-class _DownloadTask {
+class _PluginTask {
   late final String id;
   late final int key;
-  final String url;
+  final String? url;
+  final String? content;
+  final String? extension;
   final String? name;
   final String? subPath;
   final NotificationType notificationType;
@@ -15,8 +17,10 @@ class _DownloadTask {
   final Map<String, String> headers;
   final Completer<bool> _completer;
 
-  _DownloadTask({
-    required this.url,
+  _PluginTask({
+    this.url,
+    this.content,
+    this.extension,
     required this.callbacks,
     this.name,
     this.subPath,
@@ -25,7 +29,8 @@ class _DownloadTask {
     this.downloadService = DownloadService.downloadManager,
     this.methodType = DownloadRequestMethodType.get,
     this.headers = const <String, String>{},
-  }) : //key = DateTime.now().millisecondsSinceEpoch.toString(),
+  })  : assert((url != null && url.isNotEmpty) ||
+            (content != null && content.isNotEmpty)),
         _completer = Completer<bool>();
 
   bool get isDownloaded => _completer.isCompleted;
@@ -39,7 +44,6 @@ class _DownloadTask {
   Map<String, dynamic> toMap() {
     // append initial values
     final result = <String, dynamic>{
-      'url': url.trim(),
       'key': key.toString(),
       'notifications': notificationType.name,
       'download_destination': downloadDestination.name,
@@ -47,6 +51,15 @@ class _DownloadTask {
       'method_type': methodType.name,
       'headers': headers,
     };
+
+    // append file content source
+    if (url?.trim().isNotEmpty ?? false) {
+      result['url'] = url!.trim();
+    } else if (content?.trim().isNotEmpty ?? false) {
+      result['content'] = content!.trim();
+    } else {
+      throw Exception('Either URL or content must be provided and not empty!');
+    }
 
     // append callback functions
     result.addAll({
@@ -59,6 +72,11 @@ class _DownloadTask {
     // append file name if provided
     if (name?.trim().isNotEmpty ?? false) {
       result['name'] = name!.trim();
+    }
+
+    // append file extension if provided
+    if (extension?.trim().isNotEmpty ?? false) {
+      result['extension'] = extension!.trim();
     }
 
     // append sub path if provided

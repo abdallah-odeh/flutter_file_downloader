@@ -20,6 +20,8 @@ public class FileStoreHandler {
             final String extension,
             final DownloadCallbacks callbacks) {
 
+        PluginLogger.log("Writing to file " + directory + "/" + name + "." + extension);
+
         final byte[] imgBytesData = android.util.Base64.decode(
                 content,
                 android.util.Base64.DEFAULT);
@@ -27,15 +29,18 @@ public class FileStoreHandler {
         FileOutputStream fileOutputStream = null;
         File file = null;
 
-        final String fileName = String.format("%s.%s", name, extension);
+        final String fileName = String.format(
+                "%s.%s",
+                name,
+                extension.replace(".", ""));
 
         callbacks.onProgress(fileName, 0);
 
         try {
             file = new File(createFile(directory, fileName));
-            callbacks.onProgress(fileName, 0.2);
+            callbacks.onProgress(fileName, 20);
             fileOutputStream = new FileOutputStream(file);
-            callbacks.onProgress(fileName, 0.4);
+            callbacks.onProgress(fileName, 40);
         } catch (Exception e) {
             e.printStackTrace();
             callbacks.onDownloadError(e.getLocalizedMessage());
@@ -44,16 +49,16 @@ public class FileStoreHandler {
 
         final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
                 fileOutputStream);
-        callbacks.onProgress(fileName, 0.6);
+        callbacks.onProgress(fileName, 60);
         try {
             bufferedOutputStream.write(imgBytesData);
-            callbacks.onProgress(fileName, 0.8);
+            callbacks.onProgress(fileName, 80);
         } catch (IOException e) {
             e.printStackTrace();
             callbacks.onDownloadError(e.getLocalizedMessage());
             return null;
         } finally {
-            callbacks.onProgress(fileName, 1);
+            callbacks.onProgress(fileName, 100);
             try {
                 bufferedOutputStream.close();
             } catch (IOException e) {

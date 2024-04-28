@@ -21,11 +21,11 @@ class FileDownloader {
   static int _maximumParallelDownloads = _upperLimitParallelDownloads;
   static int _taskID = 0;
   static bool _enableLog = false;
-  final Map<int, _DownloadTask> _processingDownloadings = {};
-  final List<_DownloadTask> _waitingDownloads = [];
+  final Map<int, _PluginTask> _processingDownloads = {};
+  final List<_PluginTask> _waitingDownloads = [];
 
   static const _platform = MethodChannel('com.abdallah.libs/file_downloader');
-  final Map<int, _DownloadTask> _downloadTasks = {};
+  final Map<int, _PluginTask> _downloadTasks = {};
 
   FileDownloader._() {
     _platform.setMethodCallHandler(_methodCallHandler);
@@ -103,6 +103,50 @@ class FileDownloader {
           onDownloadError: onDownloadError,
         )
         .catchError((error) => throw error);
+  }
+
+  /// simple download task,
+  /// downloads the file in [url] to Downloads/ dir
+  /// using [DownloadService.downloadManager] service
+  /// [url] the URL to download
+  /// returns [File] if the download succeed
+  /// returns [null] if the download fail
+  static Future<File?> simpleDownload(final String url) async {
+    return FileDownloader()
+        ._downloadFile(url: url)
+        .catchError((error) => throw error);
+  }
+
+  ///Writes content into a file
+  ///[content] the content will be written into the file, MUST BE Base64 String
+  ///[fileName] the created file name
+  ///[extension] the file mimeType
+  ///[downloadDestination] the file destination dir/
+  ///[onProgress] a progress callback to track file creation progress
+  ///[onCompleted] a completion callback to track when created is completed
+  ///[onError] a failure callback to track when created has failed
+  ///returns the created [File] if succeed
+  static Future<File?> writeFile({
+    required final String content,
+    required final String fileName,
+    required final String extension,
+    final String? subPath,
+    final DownloadDestinations downloadDestination =
+        DownloadDestinations.publicDownloads,
+    final OnProgress? onProgress,
+    final OnDownloadCompleted? onCompleted,
+    final OnDownloadError? onError,
+  }) async {
+    return FileDownloader()._writeFile(
+      content: content,
+      fileName: fileName,
+      extension: extension,
+      subPath: subPath,
+      downloadDestination: downloadDestination,
+      onProgress: onProgress,
+      onCompleted: onCompleted,
+      onError: onError,
+    );
   }
 
   ///[urls] a list of urls to files to be downloaded
@@ -247,12 +291,60 @@ class FileDownloader {
     return false;
   }
 
+  Future<File?> _writeFile({
+    required final String content,
+    required final String fileName,
+    required final String extension,
+    final String? subPath,
+    final DownloadDestinations downloadDestination =
+        DownloadDestinations.publicDownloads,
+    final OnProgress? onProgress,
+    final OnDownloadCompleted? onCompleted,
+    final OnDownloadError? onError,
+  }) async {
+    try {
+      final task = _PluginTask(
+        content: content.trim(),
+        name: fileName.trim().isEmpty ? 'file-${_taskID + 1}' : fileName.trim(),
+        subPath: subPath,
+        extension: extension,
+        downloadDestination: downloadDestination,
+        callbacks: DownloadCallbacks(
+          onProgress: onProgress,
+          onDownloadCompleted: onCompleted,
+          onDownloadError: onError,
+        ),
+      );
+      task.key = (++_taskID);
+      _queueTask(task);
+      _downloadTasks[task.key] = task;
+
+      print('===== WRITE FILE =====');
+      for (final entry in task.toMap().entries) {
+        print('${entry.key}: ${entry.value}');
+      }
+      print('===== WRITE FILE =====');
+
+      final result = await _platform.invokeMethod(
+        'writeFile',
+        task.toMap(),
+      );
+      if (result is String && result.isNotEmpty) {
+        return File(result);
+      }
+    } catch (e) {
+      debugPrint('downloadFile error: $e');
+    }
+    return Future.value(null);
+  }
+
   Future<File?> _downloadFile({
     required final String url,
     final String? name,
     final String? subPath,
-    required final NotificationType notificationType,
-    required final DownloadDestinations downloadDestination,
+    final NotificationType notificationType = NotificationType.all,
+    final DownloadDestinations downloadDestination =
+        DownloadDestinations.publicDownloads,
     final DownloadService downloadService = DownloadService.downloadManager,
     final DownloadRequestMethodType methodType = DownloadRequestMethodType.get,
     final Map<String, String> headers = const {},
@@ -276,7 +368,7 @@ class FileDownloader {
         throw Exception(error);
       }
     }
-    final task = _DownloadTask(
+    final task = _PluginTask(
       url: url.trim(),
       name: name?.trim(),
       subPath: subPath,
@@ -298,20 +390,7 @@ class FileDownloader {
     try {
       final result = await _platform.invokeMethod(
         'downloadFile',
-        task.toMap() ??
-            {
-              'url': url.trim(),
-              'key': task.key.toString(),
-              'notifications': task.notificationType.name,
-              'download_destination': task.downloadDestination.name,
-              if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
-              'headers': headers,
-              'onidreceived': onDownloadRequestIdReceived?.toString(),
-              'onprogress_named': onProgress?.toString(),
-              'ondownloadcompleted': onDownloadCompleted?.toString(),
-              'ondownloaderror': onDownloadError?.toString(),
-              ...task.toMap(),
-            },
+        task.toMap(),
       );
       if (result is String && result.isNotEmpty) {
         return File(result);
@@ -373,14 +452,14 @@ class FileDownloader {
     debugPrint(message);
   }
 
-  void _queueTask(final _DownloadTask task) {
-    if (_processingDownloadings.length < _maximumParallelDownloads) {
+  void _queueTask(final _PluginTask task) {
+    if (_processingDownloads.length < _maximumParallelDownloads) {
       _log('Start downloading task no ${task.key}');
-      _processingDownloadings[_taskID] = task;
+      _processingDownloads[_taskID] = task;
       task.waitDownload().whenComplete(() {
         _log(
             'Download task ${task.key} is done, checking for waiting tasks...');
-        _processingDownloadings.remove(task.key);
+        _processingDownloads.remove(task.key);
         _startWaitingTask();
       });
     } else {

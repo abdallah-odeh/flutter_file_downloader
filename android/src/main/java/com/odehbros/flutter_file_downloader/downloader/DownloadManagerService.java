@@ -44,6 +44,7 @@ public class DownloadManagerService extends DownloadService {
             final long downloadedID = manager.enqueue(downloadManager);
             if (callbacks != null) {
                 callbacks.onIDReceived(downloadedID);
+                callbacks.onProgress(downloadedID);
                 //track download
                 trackDownload(manager, downloadedID);
             }
@@ -57,6 +58,8 @@ public class DownloadManagerService extends DownloadService {
             } else {
                 message = e.getMessage();
             }
+
+            PluginLogger.logThrowable(e);
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 callbacks.onDownloadError(message);
@@ -150,6 +153,7 @@ public class DownloadManagerService extends DownloadService {
                     }
                     break;
                 }
+                System.out.println("Download ID: " + downloadID + ", bytesTotal: " + bytesTotal + ", bytesDownloaded: " + bytesDownloaded);
                 if (status == DownloadManager.STATUS_SUCCESSFUL) {
                     isDownloading = false;
                 }

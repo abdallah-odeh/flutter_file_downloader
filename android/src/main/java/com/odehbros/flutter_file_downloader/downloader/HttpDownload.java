@@ -212,7 +212,7 @@ public class HttpDownload extends DownloadService {
                     activity.runOnUiThread(() -> {
                         callbacks.onDownloadError(finalMessage);
                         if (task != null) {
-                            task.result.error("Download file error", finalMessage, e.getStackTrace());
+                            task.result.error("Download file error", finalMessage, null);
                         }
                     });
                     notification.populateDownloadResult(false);

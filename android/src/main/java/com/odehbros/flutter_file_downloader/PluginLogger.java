@@ -19,4 +19,8 @@ public class PluginLogger {
         if (!shouldLog) return;
         Log.i("flutter_file_downloader", data);
     }
+
+    static public void logThrowable(Throwable throwable) {
+        throwable.printStackTrace();
+    }
 }
