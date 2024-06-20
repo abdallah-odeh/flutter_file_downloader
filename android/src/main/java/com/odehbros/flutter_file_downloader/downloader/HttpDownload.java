@@ -171,8 +171,10 @@ public class HttpDownload extends DownloadService {
                             downloadDestination.getDirectoryPath().getAbsolutePath(),
                             downloadDestination.subPath,
                             fileName);
+                    String finalFileName = fileName;
                     activity.runOnUiThread(() -> {
                         callbacks.onIDReceived(Calendar.getInstance().getTimeInMillis());
+                        callbacks.onProgress(finalFileName, 0);
                     });
                     updateNotificationFileNameFromPath(filePath);
                     PluginLogger.log("TMP FILE PATH: " + filePath);
@@ -186,7 +188,6 @@ public class HttpDownload extends DownloadService {
                         fileOutputStream.write(dataBuffer, 0, bytesRead);
                         downloadedSize += bytesRead;
                         progress = downloadedSize / size;
-                        String finalFileName = fileName;
                         double finalProgress = progress;
                         activity.runOnUiThread(() -> callbacks.onProgress(finalFileName, finalProgress * 100));
                         notification.populateProgress(progress * 100);
