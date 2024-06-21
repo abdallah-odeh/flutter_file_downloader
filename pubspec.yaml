@@ -1,6 +1,6 @@
 name: flutter_file_downloader
 description: A simple flutter plugin that downloads any file type to downloads directory
-version: 2.0.0-dev.1
+version: 2.0.0
 issue_tracker: https://github.com/abdallah-odeh/flutter_files_downloader/issues
 homepage: https://github.com/abdallah-odeh/flutter_files_downloader
 

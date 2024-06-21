@@ -1,3 +1,8 @@
+## 2.0.0
+
+- Populated download progress 0% once download starts in HTTPService
+- All in 2.0.0-dev.1
+
 ## 2.0.0-dev.1
 
 - Full refactor of the plugin
