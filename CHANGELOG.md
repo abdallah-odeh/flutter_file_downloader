@@ -1,4 +1,8 @@
-## 2.0.0-dev.1
+## 2.0.1-dev.1
+
+- Fixed bug when using both plugins `flutter_file_downloader` & `geolocator` [#52](https://github.com/abdallah-odeh/flutter_file_downloader/issues/52)
+
+## 2.0.0
 
 - Full refactor of the plugin
 - Added the ability to create sub directories in Downloads/ or AppData/ to download your files into
