@@ -26,7 +26,7 @@ public class PermissionHandler implements RequestPermissionsResultListener {
 
     private PermissionResultCallback resultCallback;
     private ErrorCallback errorCallback;
-    private static final int PERMISSION_REQUEST_CODE = 109;
+    private static final int PERMISSION_REQUEST_CODE = 8137;
 
     static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     static final String POST_NOTIFICATIONS = Manifest.permission.POST_NOTIFICATIONS;
@@ -42,10 +42,6 @@ public class PermissionHandler implements RequestPermissionsResultListener {
             int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode != PERMISSION_REQUEST_CODE) {
             return false;
-        }
-
-        for (final String permission : permissions) {
-            System.out.println("PERMISSION " + permission);
         }
 
         if (this.activity == null) {
