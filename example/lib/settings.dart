@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_file_downloader/flutter_file_downloader.dart';
-import 'package:flutter_file_downloader_example/preferences_manager.dart';
 import 'package:flutter_file_downloader_example/sesstion_settings.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -23,13 +22,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Text(
             'Enable logs',
-            style: Theme.of(context).textTheme.headline6,
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           Row(
             children: [
               Expanded(
                 child: Text(enabled ? 'Enabled' : 'Disabled',
-                    style: Theme.of(context).textTheme.subtitle1),
+                    style: Theme.of(context).textTheme.titleMedium),
               ),
               const SizedBox(width: 16),
               Switch(
@@ -45,7 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 32),
           Text(
             'Display Notifications',
-            style: Theme.of(context).textTheme.headline6,
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<NotificationType>(
@@ -74,7 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 32),
           Text(
             'Download destination',
-            style: Theme.of(context).textTheme.headline6,
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<DownloadDestinations>(
@@ -103,19 +102,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 32),
           Text(
             'Maximum parallel downloads',
-            style: Theme.of(context).textTheme.headline6,
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           Row(
             children: [
               Expanded(
                 child: Text(settings.maximumParallelDownloads.toString(),
-                    style: Theme.of(context).textTheme.subtitle1),
+                    style: Theme.of(context).textTheme.titleMedium),
               ),
               const SizedBox(width: 16),
               IconButton(
                   onPressed: () {
                     setState(() {
-                      settings.setMaximumParallelDownloads(settings.maximumParallelDownloads - 1);
+                      settings.setMaximumParallelDownloads(
+                          settings.maximumParallelDownloads - 1);
                     });
                   },
                   icon: const Icon(Icons.arrow_downward)),
@@ -123,7 +123,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               IconButton(
                   onPressed: () {
                     setState(() {
-                      settings.setMaximumParallelDownloads(settings.maximumParallelDownloads + 1);
+                      settings.setMaximumParallelDownloads(
+                          settings.maximumParallelDownloads + 1);
                     });
                   },
                   icon: const Icon(Icons.arrow_upward)),

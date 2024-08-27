@@ -54,13 +54,13 @@ class _MultipleDownloadsState extends State<MultipleDownloads> {
         children: [
           Text(
             'Parallel download',
-            style: Theme.of(context).textTheme.headline6,
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           Row(
             children: [
               Expanded(
                 child: Text(isParallel ? 'Enabled' : 'Disabled',
-                    style: Theme.of(context).textTheme.subtitle1),
+                    style: Theme.of(context).textTheme.titleMedium),
               ),
               const SizedBox(width: 16),
               Switch(
