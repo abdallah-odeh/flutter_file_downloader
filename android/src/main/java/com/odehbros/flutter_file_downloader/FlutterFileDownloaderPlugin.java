@@ -12,10 +12,6 @@ import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.odehbros.flutter_file_downloader.permission.PermissionManager;
-import com.odehbros.flutter_file_downloader.core.DownloadCompleterBroadcast;
-
-import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -24,14 +20,16 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 
+import com.odehbros.flutter_file_downloader.permissions.PermissionHandler;
+import com.odehbros.flutter_file_downloader.downloader.DownloadCompleterBroadcast;
+
 /**
  * FlutterFileDownloaderPlugin
  */
 public class FlutterFileDownloaderPlugin implements FlutterPlugin, ActivityAware {
 
     private static final String TAG = "FlutterFileDownloader";
-    private final PermissionManager permissionManager;
-
+    private PermissionHandler permissionManager;
     @Nullable
     private MethodCallHandlerImpl methodCallHandler;
     @Nullable
@@ -39,8 +37,9 @@ public class FlutterFileDownloaderPlugin implements FlutterPlugin, ActivityAware
     @Nullable
     private DownloadCompleterBroadcast onDownloadCompleted;
 
+
     public FlutterFileDownloaderPlugin() {
-        permissionManager = new PermissionManager();
+        permissionManager = new PermissionHandler();
     }
 
     @Override
@@ -64,6 +63,7 @@ public class FlutterFileDownloaderPlugin implements FlutterPlugin, ActivityAware
         this.pluginBinding = binding;
         registerListeners();
         if (methodCallHandler != null) {
+            permissionManager.setActivity(binding.getActivity());
             methodCallHandler.setActivity(binding.getActivity());
         }
     }

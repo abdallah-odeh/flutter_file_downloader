@@ -1,7 +1,7 @@
 package com.odehbros.flutter_file_downloader;
 
+import android.Manifest;
 import android.app.Activity;
-import android.app.DownloadManager;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
@@ -10,12 +10,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.odehbros.flutter_file_downloader.core.DownloadCallbacks;
-import com.odehbros.flutter_file_downloader.core.DownloadTaskBuilder;
+import com.odehbros.flutter_file_downloader.core.DownloadTask;
+import com.odehbros.flutter_file_downloader.downloadDestination.AppData;
+import com.odehbros.flutter_file_downloader.downloadDestination.DownloadDestination;
+import com.odehbros.flutter_file_downloader.downloadDestination.PublicDownloads;
+import com.odehbros.flutter_file_downloader.downloader.DownloadService;
 import com.odehbros.flutter_file_downloader.errors.ErrorCodes;
 import com.odehbros.flutter_file_downloader.errors.PermissionUndefinedException;
-import com.odehbros.flutter_file_downloader.permission.PermissionManager;
-import com.odehbros.flutter_file_downloader.permission.StoragePermission;
+import com.odehbros.flutter_file_downloader.fileStore.FileStoreHandler;
+import com.odehbros.flutter_file_downloader.permissions.PermissionHandler;
+import com.odehbros.flutter_file_downloader.permissions.PermissionStatus;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +33,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
 
     private static final String CHANNEL = "com.abdallah.libs/file_downloader";
     private static final String TAG = "MethodCallHandlerImpl";
-    private final PermissionManager permissionManager;
+    private final PermissionHandler permissionManager;
 
     @Nullable
     private Context context;
@@ -38,7 +44,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     private final Map<String, StoreHelper> stored = new HashMap<>();
 
     MethodCallHandlerImpl(
-            PermissionManager permissionManager) {
+            PermissionHandler permissionManager) {
         this.permissionManager = permissionManager;
     }
 
@@ -68,9 +74,6 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         final StoreHelper helper = new StoreHelper(call, result);
         stored.put(call.argument("key"), helper);
         switch (call.method) {
-            case "checkPermission":
-                onCheckPermission(helper.result);
-                break;
             case "requestPermission":
                 onRequestPermission(helper, true);
                 break;
@@ -80,6 +83,9 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                 break;
             case "cancelDownload":
                 cancelDownload(helper);
+                break;
+            case "writeFile":
+                onWriteFile(helper);
                 break;
             default:
                 result.notImplemented();
@@ -112,31 +118,112 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         this.activity = activity;
     }
 
-    private void onCheckPermission(MethodChannel.Result result) {
-        try {
-            StoragePermission permission = permissionManager.checkPermissionStatus(context);
-            result.success(permission.toInt());
-        } catch (PermissionUndefinedException e) {
-            ErrorCodes errorCode = ErrorCodes.permissionDefinitionsNotFound;
-            result.error(errorCode.toString(), errorCode.toDescription(), null);
+    private void onWriteFile(StoreHelper helper) {
+        final FileStoreHandler fileStoreHandler = new FileStoreHandler();
+        String key = helper.call.argument("key");
+        String content = helper.call.argument("content");
+        String name = helper.call.argument("name");
+        String extension = helper.call.argument("extension");
+        String destination = helper.call.argument("download_destination");
+        String subPath = helper.call.argument("subPath");
+
+        DownloadDestination downloadDestination = new PublicDownloads(subPath);
+
+        if (destination.equalsIgnoreCase("appfiles")) {
+            downloadDestination = new AppData(activity, subPath);
+        } else {
+            PluginLogger.log("No destination with name " + destination);
         }
+
+        final DownloadCallbacks callbacks = new DownloadCallbacks() {
+            @Override
+            public void onProgress(String name, double progress) {
+                super.onProgress(name, progress);
+
+                Map<String, Object> args = new HashMap<>();
+
+                args.put("id", id);
+                args.put("name", name);
+                args.put("progress", progress);
+                args.put("key", key);
+                channel.invokeMethod("onProgress", args);
+            }
+
+            @Override
+            public void onDownloadCompleted(String path) {
+                super.onDownloadCompleted(path);
+                PluginLogger.log("Download " + id + " has completed, path: " + path);
+
+                Map<String, Object> args = new HashMap<>();
+
+                args.put("id", id);
+                args.put("path", path);
+                args.put("key", key);
+                channel.invokeMethod("onDownloadCompleted", args);
+
+                removeTask(id);
+            }
+
+            @Override
+            public void onDownloadError(String errorMessage) {
+                super.onDownloadError(errorMessage);
+
+                Map<String, Object> args = new HashMap<>();
+
+                args.put("id", id);
+                args.put("error", errorMessage);
+                args.put("key", helper.call.argument("key"));
+                channel.invokeMethod("onDownloadError", args);
+
+                removeTask(id);
+            }
+        };
+
+        String dir = downloadDestination.getDirectoryPath().getAbsolutePath();
+        if (!TextUtils.isEmpty(subPath)) {
+            dir = String.format(
+                    "%s/%s",
+                    downloadDestination.getDirectoryPath().getAbsolutePath(),
+                    subPath
+            );
+        }
+
+        final File file = fileStoreHandler.writeFile(
+                content,
+                dir,
+                name,
+                extension,
+                callbacks
+        );
+
+        activity.runOnUiThread(() -> {
+            if (file == null) {
+                helper.result.error(
+                        "Write file error",
+                        "Could not write file at specified path!",
+                        null);
+            } else {
+                helper.result.success(file.getPath());
+            }
+        });
     }
 
     private void onRequestPermission(StoreHelper helper, final boolean sendResult) {
         try {
-            permissionManager.requestPermission(
-                    activity,
+            permissionManager.requestPermissions(
+//                    activity,
                     permission -> {
                         if (sendResult) {
                             helper.result.success(permission.toInt());
                             stored.remove(helper.call.argument("key"));
                         } else {
-                            if (permission != StoragePermission.always) {
+                            if (permission != PermissionStatus.always) {
                                 ErrorCodes errorCode = ErrorCodes.permissionDenied;
                                 helper.result.error(errorCode.toString(), errorCode.toDescription(), null);
                                 stored.remove(helper.call.argument("key"));
-                            } else
+                            } else {
                                 onMethodCall(helper.call, helper.result);
+                            }
                         }
                     },
                     (ErrorCodes errorCode) ->
@@ -148,44 +235,43 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
     }
 
     private void onStartDownloadingFile(StoreHelper helper) {
-        try {
-            if (!permissionManager.hasPermission(context)) {
-                onRequestPermission(helper, false);
-                return;
-            }
-        } catch (PermissionUndefinedException e) {
-            helper.result.error(
-                    ErrorCodes.permissionDefinitionsNotFound.toString(),
-                    ErrorCodes.permissionDefinitionsNotFound.toDescription(),
-                    null);
+        if (permissionManager.hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PermissionStatus.always) {
+            onRequestPermission(helper, false);
             return;
         }
 
-        String lastURL = helper.call.argument("url");
-        String lastName = helper.call.argument("name");
-        String lastDestination = helper.call.argument("download_destination");
+        String url = helper.call.argument("url");
+        String name = helper.call.argument("name");
+        String key = helper.call.argument("key");
+        String subPath = helper.call.argument("subPath");
+        String destination = helper.call.argument("download_destination");
+        String service = helper.call.argument("download_service");
+        String methodType = helper.call.argument("method_type");
         String notifications = helper.call.argument("notifications");
         Map<String, String> requestHeaders = helper.call.argument("headers");
 
-        new DownloadTaskBuilder(activity)
-                .setUrl(lastURL)
-                .setName(lastName)
-                .setShowNotifications(notifications)
+        final DownloadService downloadService = new DownloadTask(activity)
+                .setUrl(url)
+                .setName(name)
+                .setSubPath(subPath)
+                .setNotifications(notifications)
                 .setRequestHeaders(requestHeaders)
-                .setDownloadDestination(lastDestination)
-                .setStoreHelper(helper)
+                .setDownloadDestination(destination)
+                .setMethodType(methodType)
+                .setDownloadService(service)
+                .setHelper(helper)
                 .setCallbacks(new DownloadCallbacks() {
                     @Override
                     public void onIDReceived(long id) {
                         super.onIDReceived(id);
                         tasks.put(id, this);
 
-                        Map<String, Object> args = new HashMap();
+                        Map<String, Object> args = new HashMap<>();
 
                         args.put("id", id);
                         args.put("url", helper.call.argument("url"));
                         args.put("key", helper.call.argument("key"));
-                        stored.get(helper.call.argument("key")).id = String.valueOf(id);
+                        stored.get(key).id = String.valueOf(id);
                         channel.invokeMethod("onIDReceived", args);
                     }
 
@@ -193,11 +279,11 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     public void onProgress(double progress) {
                         super.onProgress(progress);
 
-                        Map<String, Object> args = new HashMap();
+                        Map<String, Object> args = new HashMap<>();
 
                         args.put("id", id);
                         args.put("progress", progress);
-                        args.put("key", helper.call.argument("key"));
+                        args.put("key", key);
                         channel.invokeMethod("onProgress", args);
                     }
 
@@ -205,24 +291,25 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     public void onProgress(String name, double progress) {
                         super.onProgress(name, progress);
 
-                        Map<String, Object> args = new HashMap();
+                        Map<String, Object> args = new HashMap<>();
 
                         args.put("id", id);
                         args.put("name", name);
                         args.put("progress", progress);
-                        args.put("key", helper.call.argument("key"));
+                        args.put("key", key);
                         channel.invokeMethod("onProgress", args);
                     }
 
                     @Override
                     public void onDownloadCompleted(String path) {
                         super.onDownloadCompleted(path);
+                        PluginLogger.log("Download " + id + " has completed, path: " + path);
 
-                        Map<String, Object> args = new HashMap();
+                        Map<String, Object> args = new HashMap<>();
 
                         args.put("id", id);
                         args.put("path", path);
-                        args.put("key", helper.call.argument("key"));
+                        args.put("key", key);
                         channel.invokeMethod("onDownloadCompleted", args);
 
                         removeTask(id);
@@ -232,7 +319,7 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                     public void onDownloadError(String errorMessage) {
                         super.onDownloadError(errorMessage);
 
-                        Map<String, Object> args = new HashMap();
+                        Map<String, Object> args = new HashMap<>();
 
                         args.put("id", id);
                         args.put("error", errorMessage);
@@ -242,8 +329,11 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                         removeTask(id);
                     }
                 })
-                .build()
-                .startDownloading(context);
+                .setMethodCallHandler(this)
+                .build();
+
+        helper.setDownloadService(downloadService);
+        downloadService.startDownload();
     }
 
     private void removeTask(final long id) {
@@ -254,17 +344,23 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
         final long id = Long.valueOf(helper.call.argument("id"));
 
         final DownloadCallbacks task = tasks.get(id);
-        if (task == null) {
+        final StoreHelper srcHelper = findHelper(id);
+        if (task == null && srcHelper == null) {
             helper.result.error(
                     "Download task not found",
                     "Could not find an active download task with id " + id,
                     null);
             return;
         }
-        task.onDownloadError("Download canceled");
-        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-        final int removedCount = downloadManager.remove(id);
-        helper.result.success(removedCount > 0);
+        final boolean isCanceled = srcHelper.getDownloadService().cancelDownload(id);
+        if (isCanceled) {
+            helper.result.success(true);
+        } else {
+            helper.result.error(
+                    "Cancel download failed",
+                    "Cancel download failed due to unknown error!",
+                    null);
+        }
     }
 
     public DownloadCallbacks getTask(final long id) {
