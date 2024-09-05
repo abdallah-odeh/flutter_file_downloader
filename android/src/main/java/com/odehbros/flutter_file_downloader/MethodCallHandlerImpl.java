@@ -146,7 +146,11 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                 args.put("name", name);
                 args.put("progress", progress);
                 args.put("key", key);
-                channel.invokeMethod("onProgress", args);
+                try {
+                    channel.invokeMethod("onProgress", args);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -159,7 +163,11 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                 args.put("id", id);
                 args.put("path", path);
                 args.put("key", key);
-                channel.invokeMethod("onDownloadCompleted", args);
+                try {
+                    channel.invokeMethod("onDownloadCompleted", args);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 removeTask(id);
             }
@@ -173,7 +181,11 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                 args.put("id", id);
                 args.put("error", errorMessage);
                 args.put("key", helper.call.argument("key"));
-                channel.invokeMethod("onDownloadError", args);
+                try {
+                    channel.invokeMethod("onDownloadError", args);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 removeTask(id);
             }
@@ -272,7 +284,11 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                         args.put("url", helper.call.argument("url"));
                         args.put("key", helper.call.argument("key"));
                         stored.get(key).id = String.valueOf(id);
-                        channel.invokeMethod("onIDReceived", args);
+                        try {
+                            channel.invokeMethod("onIDReceived", args);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     @Override
@@ -284,7 +300,11 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                         args.put("id", id);
                         args.put("progress", progress);
                         args.put("key", key);
-                        channel.invokeMethod("onProgress", args);
+                        try {
+                            channel.invokeMethod("onProgress", args);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     @Override
@@ -297,7 +317,11 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                         args.put("name", name);
                         args.put("progress", progress);
                         args.put("key", key);
-                        channel.invokeMethod("onProgress", args);
+                        try {
+                            channel.invokeMethod("onProgress", args);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     @Override
@@ -310,7 +334,11 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                         args.put("id", id);
                         args.put("path", path);
                         args.put("key", key);
-                        channel.invokeMethod("onDownloadCompleted", args);
+                        try {
+                            channel.invokeMethod("onDownloadCompleted", args);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
 
                         removeTask(id);
                     }
@@ -324,7 +352,11 @@ public class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
                         args.put("id", id);
                         args.put("error", errorMessage);
                         args.put("key", helper.call.argument("key"));
-                        channel.invokeMethod("onDownloadError", args);
+                        try {
+                            channel.invokeMethod("onDownloadError", args);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
 
                         removeTask(id);
                     }
