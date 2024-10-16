@@ -1,3 +1,7 @@
+## 2.0.1-dev.3
+
+- Fixed bug [#57](https://github.com/abdallah-odeh/flutter_file_downloader/issues/57) where images & pdfs might be downloaded without an extension resulting to inability to open the file
+
 ## 2.0.1-dev.2
 
 - Fixed bug [#53](https://github.com/abdallah-odeh/flutter_file_downloader/issues/53) endless loop in the background

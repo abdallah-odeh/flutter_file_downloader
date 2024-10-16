@@ -48,10 +48,22 @@ abstract public class DownloadService {
     protected abstract void download();
 
     public String getFileNameFromContent(final String contentDisposition) {
+        if (TextUtils.isEmpty(contentDisposition)) return null;
         try {
-            if (TextUtils.isEmpty(contentDisposition)) return null;
             final String[] parts = contentDisposition.split(" ");
             return parts[1].replaceFirst("filename=", "");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public String getFileExtension(final String contentType) {
+        System.out.println("Getting extension from " + contentType);
+        if (TextUtils.isEmpty(contentType)) return null;
+        try {
+            final String[] parts = contentType.split("/");
+            return parts[parts.length - 1].toString().toLowerCase();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
