@@ -1,3 +1,10 @@
+## 2.1.0
+
+- Upgraded gradle version to the latest 
+- Added namespace to fix [#66](https://github.com/abdallah-odeh/flutter_file_downloader/issues/66)
+
+- Fixed bug [#57](https://github.com/abdallah-odeh/flutter_file_downloader/issues/57) where images & pdfs might be downloaded without an extension resulting to inability to open the file
+
 ## 2.0.1-dev.3
 
 - Fixed bug [#57](https://github.com/abdallah-odeh/flutter_file_downloader/issues/57) where images & pdfs might be downloaded without an extension resulting to inability to open the file
