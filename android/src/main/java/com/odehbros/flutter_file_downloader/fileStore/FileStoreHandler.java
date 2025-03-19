@@ -37,7 +37,7 @@ public class FileStoreHandler {
         callbacks.onProgress(fileName, 0);
 
         try {
-            file = new File(createFile(directory, fileName));
+            file = new File(createFile(directory, name, extension));
             callbacks.onProgress(fileName, 20);
             fileOutputStream = new FileOutputStream(file);
             callbacks.onProgress(fileName, 40);
@@ -69,27 +69,35 @@ public class FileStoreHandler {
         return file;
     }
 
-    public String createFile(String directory, String subPath, String name) throws IOException {
+    public String createFile(String directory, String subPath, String name, final String extension) throws IOException {
         if (TextUtils.isEmpty(subPath)) {
             return createFile(
                     directory,
-                    name);
+                    name,
+                    extension);
         }
         subPath = FileUtils.fixSubPath(subPath);
         return createFile(
                 String.format("%s/%s", directory, subPath),
-                name);
+                name,
+                extension);
     }
 
-    public String createFile(final String directory, final String name) throws IOException {
+    public String createFile(final String directory, final String name, final String extension) throws IOException {
         String path = String.format("%s/%s", directory, name);
         final String[] splitted = name.split("\\.");
-        final String extension = splitted[splitted.length - 1];
+        final String extension2 = splitted[splitted.length - 1];
+        final String fileName = name.replaceAll("." + extension, "").replaceAll("." + extension2, "");
         if (!FileUtils.createDir(directory)) {
             PluginLogger.log("Create directories " + directory + " failed!");
             return null;
         }
         int instanceNo = 0;
+        String ext = extension;
+        if (TextUtils.isEmpty(extension)) ext = extension2;
+        if (TextUtils.isEmpty(extension2)) {
+            PluginLogger.log("Could not detect file extension for file " + name);
+        }
         do {
             File file = new File(path);
             if (file.exists()) {
@@ -97,9 +105,9 @@ public class FileStoreHandler {
                 path = String.format(Locale.ENGLISH,
                         "%s/%s-%d.%s",
                         directory,
-                        name.replaceAll("." + extension, ""),
+                        fileName.replaceAll("." + ext, ""),
                         instanceNo,
-                        extension
+                        ext
                 );
                 continue;
             }

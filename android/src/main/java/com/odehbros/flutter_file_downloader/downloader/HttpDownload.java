@@ -164,13 +164,15 @@ public class HttpDownload extends DownloadService {
                     if (TextUtils.isEmpty(fileName)) {
                         fileName = FILE_NAME;
                     }
+                    final String extension = getFileExtension(urlConnection.getHeaderField("Content-Type"));
 
                     BufferedInputStream in = new BufferedInputStream(urlConnection.getInputStream());
                     File tmpFile = new File(fileName + ".tmp");
                     final String filePath = fileStoreHandler.createFile(
                             downloadDestination.getDirectoryPath().getAbsolutePath(),
                             downloadDestination.subPath,
-                            fileName);
+                            fileName,
+                            extension);
                     String finalFileName = fileName;
                     activity.runOnUiThread(() -> {
                         callbacks.onIDReceived(Calendar.getInstance().getTimeInMillis());
