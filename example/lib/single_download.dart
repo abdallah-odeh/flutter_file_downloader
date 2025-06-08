@@ -100,9 +100,7 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
 
   void _onDownloadFilePressed() async {
     FileDownloader.downloadFile(
-        // url: 'https://odeh-bros.com/dummy-link/file.pdf',
         url: url.text.trim(),
-        // url: 'https://odeh-bros.com/dummy-link/file.pdf',
         name: name.text.trim(),
         // headers: {'Header': 'Test'},
         subPath: subPath.text.trim(),

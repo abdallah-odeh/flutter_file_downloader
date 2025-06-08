@@ -334,6 +334,7 @@ class FileDownloader {
       }
     } catch (e) {
       debugPrint('downloadFile error: $e');
+      onError?.call(e.toString());
     }
     return Future.value(null);
   }
@@ -397,6 +398,7 @@ class FileDownloader {
       }
     } catch (e) {
       debugPrint('downloadFile error: $e');
+      onDownloadError?.call(e.toString());
     }
     return Future.value(null);
   }

@@ -170,6 +170,7 @@ public class DownloadManagerService extends DownloadService {
 
                 final double progress = (int) ((bytesDownloaded * 100L) / bytesTotal);
                 if (lastProgress != progress) {
+                    System.out.println("Download ID: " + downloadID + ", bytesTotal: " + bytesTotal + ", bytesDownloaded: " + bytesDownloaded);
                     if (callbacks != null) {
                         if (downloadName != null && !downloadName.isEmpty()) {
                             uiThreadHandler.post(() -> {

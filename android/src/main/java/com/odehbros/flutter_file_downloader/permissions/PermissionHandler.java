@@ -22,7 +22,7 @@ import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
 
 public class PermissionHandler implements RequestPermissionsResultListener {
 
-    private  Activity activity;
+    private Activity activity;
 
     private PermissionResultCallback resultCallback;
     private ErrorCallback errorCallback;
@@ -31,7 +31,8 @@ public class PermissionHandler implements RequestPermissionsResultListener {
     static final String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     static final String POST_NOTIFICATIONS = Manifest.permission.POST_NOTIFICATIONS;
 
-    public PermissionHandler(){}
+    public PermissionHandler() {
+    }
 
     public void setActivity(final Activity activity) {
         this.activity = activity;
@@ -130,10 +131,9 @@ public class PermissionHandler implements RequestPermissionsResultListener {
     }
 
     private void requestStoragePermission() {
-        // Before Android M, requesting permissions was not needed.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
-
-        if (getTargetSdkVersion(activity) >= Build.VERSION_CODES.TIRAMISU) return;
+        if (!doesRequireStoragePermission()) {
+            return;
+        }
 
         if (hasPermission(WRITE_EXTERNAL_STORAGE) == PermissionStatus.always) return;
 
@@ -147,9 +147,24 @@ public class PermissionHandler implements RequestPermissionsResultListener {
                 PERMISSION_REQUEST_CODE);
     }
 
+    private boolean doesRequireStoragePermission() {
+//        System.out.println("IS PERMISSION REQUIRED? " + Build.VERSION_CODES.M + " <= " + Build.VERSION.SDK_INT + " < " + Build.VERSION_CODES.Q);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10+ doesn't require WRITE_EXTERNAL_STORAGE for app-specific directories
+            return false;
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            // Permissions not needed before Android M
+            return false;
+        }
+        return true;
+    }
+
     public PermissionStatus hasPermission(final String permission) {
         if (Objects.equals(permission, WRITE_EXTERNAL_STORAGE)) {
-            if (getTargetSdkVersion(activity) >= Build.VERSION_CODES.TIRAMISU) {
+            if (!doesRequireStoragePermission()) {
                 return PermissionStatus.always;
             }
         }
@@ -164,16 +179,5 @@ public class PermissionHandler implements RequestPermissionsResultListener {
         }
 
         return PermissionStatus.deniedForever;
-    }
-
-    private int getTargetSdkVersion(final Context context) {
-        final String packageName = context.getPackageName();
-        final PackageManager packageManager = context.getPackageManager();
-        try {
-            final ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
-            return applicationInfo.targetSdkVersion;
-        } catch (PackageManager.NameNotFoundException e) {
-            return -1;
-        }
     }
 }
