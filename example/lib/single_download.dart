@@ -41,9 +41,7 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
               const SizedBox(height: 16),
             ],
             if (_progress != null) ...[
-              CircularProgressIndicator(
-                value: _progress! / 100,
-              ),
+              LinearProgressIndicator(value: _progress! / 100),
               const SizedBox(height: 16),
             ],
             TextField(
@@ -110,7 +108,7 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
         subPath: subPath.text.trim(),
         downloadDestination: settings.downloadDestination,
         notificationType: settings.notificationType,
-        downloadService: DownloadService.httpConnection,
+        downloadService: DownloadService.downloadManager,
         onDownloadRequestIdReceived: (id) {
           print('DOWNLOAD: $id');
           setState(() => _downloadId = id);
@@ -119,7 +117,7 @@ class _SingleDownloadScreenState extends State<SingleDownloadScreen> {
           print('PROG: $progress');
           setState(() {
             _progress = progress;
-            _status = 'Progress: $progress%';
+            _status = 'Progress: ${progress.toStringAsFixed(2)}%';
           });
         },
         onDownloadCompleted: (path) {
