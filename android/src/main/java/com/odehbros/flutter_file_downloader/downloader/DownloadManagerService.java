@@ -30,6 +30,7 @@ public class DownloadManagerService extends DownloadService {
         super(activity, url, name, notifications, downloadDestination, callbacks, requestHeaders, helper);
 
         downloadManager = new DownloadManager.Request(Uri.parse(url));
+        PluginLogger.log("Download manager created a request to download the URL " + url);
 
         setDownloadPath();
     }
@@ -44,7 +45,7 @@ public class DownloadManagerService extends DownloadService {
             final long downloadedID = manager.enqueue(downloadManager);
             if (callbacks != null) {
                 callbacks.onIDReceived(downloadedID);
-                callbacks.onProgress(downloadedID);
+                callbacks.onProgress(0);
                 //track download
                 trackDownload(manager, downloadedID);
             }
@@ -153,7 +154,6 @@ public class DownloadManagerService extends DownloadService {
                     }
                     break;
                 }
-                System.out.println("Download ID: " + downloadID + ", bytesTotal: " + bytesTotal + ", bytesDownloaded: " + bytesDownloaded);
                 if (status == DownloadManager.STATUS_SUCCESSFUL) {
                     isDownloading = false;
                 }
@@ -170,6 +170,7 @@ public class DownloadManagerService extends DownloadService {
 
                 final double progress = (int) ((bytesDownloaded * 100L) / bytesTotal);
                 if (lastProgress != progress) {
+                    System.out.println("Download ID: " + downloadID + ", bytesTotal: " + bytesTotal + ", bytesDownloaded: " + bytesDownloaded);
                     if (callbacks != null) {
                         if (downloadName != null && !downloadName.isEmpty()) {
                             uiThreadHandler.post(() -> {
