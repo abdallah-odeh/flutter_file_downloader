@@ -1,4 +1,4 @@
-## 2.1.1-dev.1
+## 2.1.1
 
 - Fixed [#62](https://github.com/abdallah-odeh/flutter_file_downloader/issues/62); permission issue with android 8
 - Fixed [#69](https://github.com/abdallah-odeh/flutter_file_downloader/issues/69); initial progress is not zero
